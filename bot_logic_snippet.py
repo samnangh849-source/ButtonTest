@@ -1,21 +1,3 @@
-# =============================================================
-# នេះគឺជាកូដឧទាហរណ៍ពេញលេញដែលប្រើបណ្ណាល័យ 'pyTelegramBotAPI' (pip install pyTelegramBotAPI)
-# ដើម្បីដំណើរការ Bot នេះ អ្នកត្រូវ៖
-# 1. ប្តូរ 'YOUR_BOT_TOKEN' ទៅជា API Token ពិតប្រាកដរបស់អ្នក។
-# 2. ប្តូរ 'BOT_BASE_URL' ទៅជា URL របស់ Label Printer Web Service របស់អ្នក។
-
-import re
-import urllib.parse
-from telebot import TeleBot, types
-
-# ==================== កំណត់រចនាសម្ព័ន្ធ Bot ====================
-BOT_TOKEN = "8076401419:AAEIBzxnT3XGRA96XIVspbxKpLHfywFqm9k" # <<<<<< ត្រូវប្តូរ Token នេះ
-BOT_BASE_URL = "https://samnangh849-source.github.io/ButtonTest/" # <<<<<< ត្រូវប្តូរ URL នេះ
-bot = TeleBot(BOT_TOKEN)
-
-
-
-
 # នេះគឺជាកូដសម្រាប់ដំណើរការ Bot ដោយប្រើ Webhook (ល្អបំផុតសម្រាប់ Free Hosting)
 # Bot នឹងត្រូវប្រើ Web Framework ដូចជា Flask ដើម្បីទទួលសារពី Telegram។
 
@@ -33,7 +15,7 @@ BOT_TOKEN = "8076401419:AAEIBzxnT3XGRA96XIVspbxKpLHfywFqm9k"
 BOT_BASE_URL = "https://samnangh849-source.github.io/ButtonTest/"
 
 # !!! 3. កំណត់ URL របស់ Server របស់ Bot ដែលនឹងទទួល Webhook (ឧទាហរណ៍: https://my-telegram-bot.render.com/)
-WEBHOOK_URL_BASE = "YOUR_BOT_WEBHOOK_URL" 
+WEBHOOK_URL_BASE = "https://buttontest-zqa5.onrender.com" 
 WEBHOOK_URL_PATH = f"/{BOT_TOKEN}"
 
 # កំណត់ Port សម្រាប់ Flask (ប្រើ Environment Variable ឬ 5000)
