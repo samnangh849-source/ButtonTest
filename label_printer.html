@@ -1,0 +1,182 @@
+<!--
+    Label Printer Service (78mm x 50mm)
+    This single HTML file is responsible for:
+    1. Loading data from URL parameters (name, phone, location, total).
+    2. Styling the content for a 78mm x 50mm thermal label printer using CSS @page rules.
+    3. Automatically triggering the print dialog.
+-->
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Label Print - 78x50mm</title>
+    <!-- Load Tailwind CSS for utility styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans Khmer', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* ---------------------------------------------------- */
+        /* CSS សម្រាប់ការបោះពុម្ព (Print Specific Styles) */
+        /* ---------------------------------------------------- */
+        @page {
+            /* កំណត់ទំហំ Label: 78mm x 50mm (Landscape Mode) */
+            size: 78mm 50mm landscape;
+            margin: 0; /* លុប Margin ទាំងអស់ */
+        }
+
+        .label-container {
+            width: 78mm;
+            height: 50mm;
+            padding: 2mm; 
+            box-sizing: border-box;
+            background-color: white;
+            border: 1px solid #ccc; /* សម្រាប់មើលឃើញក្នុង Browser ប៉ុណ្ណោះ */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .print-only {
+            display: none;
+        }
+        
+        /* នៅពេលបោះពុម្ព */
+        @media print {
+            body {
+                background: none;
+                /* បង្ហាញតែ Container សម្រាប់បោះពុម្ព */
+                display: block; 
+                margin: 0;
+            }
+            .label-container {
+                border: none;
+                box-shadow: none;
+            }
+            .no-print {
+                display: none;
+            }
+            .print-only {
+                display: block;
+            }
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- UI សម្រាប់ Browser (សម្រាប់មើល និងបញ្ជា Print) -->
+    <div class="no-print p-6 bg-white rounded-xl shadow-2xl m-4 max-w-md w-full">
+        <h1 class="text-2xl font-bold mb-4 text-center text-gray-800">📦 ពិនិត្យ Label មុនពេលព្រីន</h1>
+        <p id="loading-message" class="text-center text-red-500 font-semibold mb-4">កំពុងរង់ចាំទិន្នន័យ...</p>
+        
+        <!-- Label Preview Area -->
+        <div id="label-preview" class="border-4 border-dashed border-indigo-300 p-2 my-4 rounded-lg bg-gray-50 flex justify-center items-center h-48">
+            <div class="label-container shadow-lg">
+                <!-- Data will be populated here by JavaScript -->
+                <div class="text-center text-gray-400 text-sm italic">Label Preview (78mm x 50mm)</div>
+            </div>
+        </div>
+
+        <!-- Print Button -->
+        <button onclick="printLabel()" id="print-button" disabled
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition duration-150 ease-in-out disabled:opacity-50">
+            ✅ ចុចដើម្បីបោះពុម្ព Label
+        </button>
+    </div>
+
+    <!-- Label Container ដែលមានទំហំ 78x50mm សម្រាប់បោះពុម្ព -->
+    <div id="actual-label-container" class="print-only label-container">
+        <!-- JS will clone content here for printing -->
+    </div>
+
+    <script>
+        // សម្រាប់ធ្វើការ Encode/Decode URL
+        function getUrlParams() {
+            const params = {};
+            // ប្រើ URLSearchParams សម្រាប់ទាញយក Query String
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            
+            // ប្រមូលទិន្នន័យ
+            params.name = urlParams.get('name') || 'N/A';
+            params.phone = urlParams.get('phone') || 'N/A';
+            params.location = urlParams.get('location') || 'N/A';
+            params.total = urlParams.get('total') || '0.00';
+            
+            return params;
+        }
+
+        function populateLabel() {
+            const data = getUrlParams();
+            const previewContainer = document.querySelector('#label-preview .label-container');
+            const actualContainer = document.getElementById('actual-label-container');
+            const loadingMessage = document.getElementById('loading-message');
+            const printButton = document.getElementById('print-button');
+
+            if (data.name === 'N/A') {
+                loadingMessage.textContent = "⚠️ ទិន្នន័យមិនពេញលេញ (Name បាត់)";
+                return;
+            }
+
+            loadingMessage.textContent = "ទិន្នន័យត្រូវបានផ្ទុកដោយជោគជ័យ។";
+            printButton.disabled = false;
+            
+            const content = `
+                <div class="flex flex-col h-full text-xs text-gray-900 font-khmer">
+                    <!-- Top Section: General Info & Name -->
+                    <div class="flex justify-between items-center pb-1 border-b border-gray-900">
+                        <span class="text-[8px] font-bold">Gadme Store</span>
+                        <span class="text-[8px] font-bold">Total: $${data.total}</span>
+                    </div>
+
+                    <!-- Customer & Contact Info -->
+                    <div class="mt-1 flex-grow">
+                        <div class="mb-[2px] text-[10px]">
+                            <span class="font-bold">👤 ឈ្មោះ:</span> ${data.name}
+                        </div>
+                        <div class="mb-[2px] text-[10px]">
+                            <span class="font-bold">📞 ទូរស័ព្ទ:</span> ${data.phone}
+                        </div>
+                        <div class="text-[10px]">
+                            <span class="font-bold">📍 ទីតាំង:</span> ${data.location}
+                        </div>
+                    </div>
+
+                    <!-- Optional Barcode/QR Code Placeholder (for real-world scenario) -->
+                    <div class="flex justify-center items-center pt-1 border-t border-gray-900 mt-auto">
+                        <span class="text-[8px] italic">Scan for Order Details</span>
+                    </div>
+                </div>
+            `;
+            
+            // បង្ហាញក្នុង Preview
+            previewContainer.innerHTML = content;
+            
+            // បង្ហាញក្នុង Actual Print Container
+            actualContainer.innerHTML = content;
+
+            // ត្រៀមខ្លួនសម្រាប់ Print
+            // window.print(); // uncomment នេះប្រសិនបើអ្នកចង់ឱ្យវា Print ដោយស្វ័យប្រវត្តិ
+        }
+
+        function printLabel() {
+            window.print();
+        }
+
+        window.onload = populateLabel;
+        
+    </script>
+</body>
+</html>
