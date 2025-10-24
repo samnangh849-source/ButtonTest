@@ -15,7 +15,7 @@ from flask import Flask, request, abort # ត្រូវការ Flask សម�
 BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', "8076401419:AAEIBzxnT3XGRA96XIVspbxKpLHfywFqm9k") 
 
 # !!! 2. ត្រូវប្តូរ URL នេះ (ទៅជា HTTPS URL របស់ Label Printer HTML ដែលដាក់ Host សាធារណៈ)
-BOT_BASE_URL = "https://samnangh849-source.github.io/ButtonTest/"
+BOT_BASE_URL = "https://samnangh849-source.github.io/ButtonTest/label_printer.html"
 
 # !!! 3. កំណត់ URL របស់ Server របស់ Bot ដែលនឹងទទួល Webhook (ដែលបានមកពី Render)
 WEBHOOK_URL_BASE = "https://buttontest-zqa5.onrender.com" 
