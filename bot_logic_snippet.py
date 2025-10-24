@@ -10,8 +10,9 @@ from telebot import TeleBot, types
 from flask import Flask, request, abort # ត្រូវការ Flask សម្រាប់ Webhook
 
 # ==================== កំណត់រចនាសម្ព័ន្ធ Bot & Server ====================
-# !!! 1. ត្រូវប្តូរ Token នេះ (ត្រូវតែជា Token ពិតប្រាកដរបស់អ្នក)
-BOT_TOKEN = "8076401419:AAEIBzxnT3XGRA96XIVspbxKpLHfywFqm9k" 
+# !!! 1. Token ត្រូវបានកំណត់តាមរយៈ Render Environment Variable (ល្អបំផុតសម្រាប់ Production)
+# សូមកំណត់ TELEGRAM_BOT_TOKEN នៅក្នុង Render Dashboard របស់អ្នក
+BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', "8076401419:AAEIBzxnT3XGRA96XIVspbxKpLHfywFqm9k") 
 
 # !!! 2. ត្រូវប្តូរ URL នេះ (ទៅជា HTTPS URL របស់ Label Printer HTML ដែលដាក់ Host សាធារណៈ)
 BOT_BASE_URL = "https://samnangh849-source.github.io/ButtonTest/"
@@ -50,11 +51,17 @@ def test_handler(message):
     Handler សម្រាប់សាកល្បងថាតើ Bot អាចផ្ញើសារបានដែរឬទេ?
     """
     try:
-        bot.send_message(message.chat.id, "Bot ដំណើរការហើយ! Chat ID របស់អ្នកគឺ: " + str(message.chat.id))
+        # ប្រើ parse_mode='Markdown' ធម្មតាដើម្បីជៀសវាងកំហុស formatting
+        bot.send_message(
+            message.chat.id, 
+            "Bot ដំណើរការហើយ! Chat ID របស់អ្នកគឺ: " + str(message.chat.id),
+            parse_mode='Markdown' # ប្រើ Markdown ជំនួស HTML
+        )
         print("INFO: Test message sent successfully.")
         sys.stdout.flush()
     except Exception as e:
-        print(f"ERROR: Failed to send test message: {e}")
+        # បង្ហាញ Error Code ក្នុង Log ពេលបរាជ័យ
+        print(f"ERROR: Failed to send test message. Check Bot Permissions or Token: {e}")
         sys.stdout.flush()
 
 
@@ -118,6 +125,7 @@ def handle_all_messages(message):
 
     if inline_keyboard:
         try:
+            # ពេលផ្ញើសារ Bot ប្រើ parse_mode='HTML' ព្រោះសារដើមមាន Emoticon និង Formatting 
             bot.send_message(
                 chat_id=message.chat.id,
                 text=message.text, 
