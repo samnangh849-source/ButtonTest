@@ -68,7 +68,7 @@ def generate_label_button(message_text):
             'total': total_amount
         }
         query_string = urllib.parse.urlencode(params)
-        label_url = f"{BOT_BASE_URL}?{query_string}"
+        label_url = f"{BOT_BASE_URL}label_printer.html?{query_string}" # កែសម្រួល URL
 
         # 3. បង្កើត Inline Keyboard Markup
         keyboard = types.InlineKeyboardMarkup()
@@ -104,6 +104,8 @@ def handle_all_messages(message):
             print(f"ERROR: Failed to send message: {e}")
             
     else:
+        # បន្ថែម Log ពេល Regex រកមិនឃើញទម្រង់
+        print(f"DEBUG: Regex failed to match for Chat ID: {message.chat.id}") 
         # មិនធ្វើអ្វីទាំងអស់បើសារមិនត្រូវទម្រង់
         pass 
 
