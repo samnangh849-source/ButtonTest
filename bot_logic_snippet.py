@@ -41,13 +41,14 @@ def generate_label_button(message_text):
     """
     ពិនិត្យមើលសារ និងទាញយកទិន្នន័យ។
     """
+    # កែសម្រួល: ជំនួស \n ដោយ .*? ដើម្បីឱ្យ Regex ទន់ជាងមុន និងអាចចាប់យក Line Breaks គ្រប់ប្រភេទ
     pattern = re.compile(r"""
-        👤\s*អតិថិជន\s*:\s*(?P<name>.*?)\n           # Capture Name
-        📞\s*លេខទូរស័ព្ទ\s*:\s*(?P<phone>.*?)\n        # Capture Phone
-        📍\s*ទីតាំង\s*:\s*(?P<location>.*?)\n        # Capture Location
+        👤\s*អតិថិជន\s*:\s*(?P<name>.*?)             # Capture Name
+        .*?📞\s*លេខទូរស័ព្ទ\s*:\s*(?P<phone>.*?)      # Capture Phone
+        .*?📍\s*ទីតាំង\s*:\s*(?P<location>.*?)        # Capture Location
         .*?                                         # Skip intermediate content
-        សរុបចុងក្រោយ\s*:\s*\$(?P<total>[\d\.]+)\s*\n # Capture Final Total
-    """, re.VERBOSE | re.DOTALL)
+        សរុបចុងក្រោយ\s*:\s*\$(?P<total>[\d\.]+)\s* # Capture Final Total
+    """, re.VERBOSE | re.DOTALL) # DOTALL ធ្វើឱ្យ . អាចចាប់យក Line Breaks
 
     match = pattern.search(message_text)
 
@@ -85,6 +86,8 @@ def handle_all_messages(message):
     """
     Handler សម្រាប់សារអត្ថបទទាំងអស់។
     """
+    # បន្ថែម Log ដើម្បីមើលសារដែល Bot ទទួលបាន
+    print(f"DEBUG: Message text received: {message.text}") 
     
     inline_keyboard, label_url = generate_label_button(message.text)
 
