@@ -33,10 +33,9 @@ def webhook():
     if request.headers.get('content-type') == 'application/json':
         json_string = request.get_data().decode('utf-8')
         
-        # *** DEBUG LINE ADDED: Print raw JSON payload ***
         # នេះសម្រាប់មើលថា Telegram បានផ្ញើអ្វីមកទាំងស្រុង
         print(f"DEBUG: Raw JSON Payload Received: {json_string}")
-        sys.stdout.flush() # *** NEW: បង្ខំឱ្យ Log ត្រូវបានបង្ហាញភ្លាមៗ ***
+        sys.stdout.flush() # បង្ខំឱ្យ Log ត្រូវបានបង្ហាញភ្លាមៗ
         
         update = types.Update.de_json(json_string)
         bot.process_new_updates([update])
@@ -44,13 +43,27 @@ def webhook():
     else:
         abort(403) # បដិសេធសំណើដែលមិនមែនជា JSON (ការពារសុវត្ថិភាព)
 
+# ==================== Test Command (NEW) ====================
+@bot.message_handler(commands=['test'])
+def test_handler(message):
+    """
+    Handler សម្រាប់សាកល្បងថាតើ Bot អាចផ្ញើសារបានដែរឬទេ?
+    """
+    try:
+        bot.send_message(message.chat.id, "Bot ដំណើរការហើយ! Chat ID របស់អ្នកគឺ: " + str(message.chat.id))
+        print("INFO: Test message sent successfully.")
+        sys.stdout.flush()
+    except Exception as e:
+        print(f"ERROR: Failed to send test message: {e}")
+        sys.stdout.flush()
+
+
 # ==================== Functionality (ដូចដើម) ====================
 def generate_label_button(message_text):
     """
     ពិនិត្យមើលសារ និងទាញយកទិន្នន័យ។
     """
-    # កែសម្រួល: ឥឡូវ Regex គឺទន់ភ្លន់ខ្លាំងណាស់ (Aggressive)
-    # ប្រើ .*? នៅដើម និងចន្លោះដើម្បីរំលង Line Breaks និង Emoticons
+    # Regex ត្រូវបានធ្វើឱ្យទន់ភ្លន់បំផុត (Aggressive)
     pattern = re.compile(r"""
         .*?                                             # (NEW) Skip everything before the first tag (e.g. ✅...)
         👤\s*អតិថិជន\s*:\s*(?P<name>.*?)                # Capture Name
@@ -99,6 +112,7 @@ def handle_all_messages(message):
     """
     # បន្ថែម Log ដើម្បីមើលសារដែល Bot ទទួលបាន
     print(f"DEBUG: Message text received: {message.text}") 
+    sys.stdout.flush() # បង្ខំឱ្យ Log ត្រូវបានបង្ហាញភ្លាមៗ
     
     inline_keyboard, label_url = generate_label_button(message.text)
 
@@ -112,14 +126,18 @@ def handle_all_messages(message):
             )
             # សម្រាប់ Console Log នៅលើ Render
             print(f"INFO: Success sending button to Chat ID: {message.chat.id}")
+            sys.stdout.flush()
             print(f"INFO: Label URL: {label_url}") 
+            sys.stdout.flush()
             
         except Exception as e:
             print(f"ERROR: Failed to send message: {e}")
+            sys.stdout.flush()
             
     else:
         # បន្ថែម Log ពេល Regex រកមិនឃើញទម្រង់
         print(f"DEBUG: Regex failed to match for Chat ID: {message.chat.id}") 
+        sys.stdout.flush()
         # មិនធ្វើអ្វីទាំងអស់បើសារមិនត្រូវទម្រង់
         pass 
 
