@@ -4,6 +4,7 @@
 import re
 import urllib.parse
 import os
+import json # *** NEW: ត្រូវការសម្រាប់ Debugging JSON Payload ***
 from telebot import TeleBot, types
 from flask import Flask, request, abort # ត្រូវការ Flask សម្រាប់ Webhook
 
@@ -30,6 +31,11 @@ app = Flask(__name__)
 def webhook():
     if request.headers.get('content-type') == 'application/json':
         json_string = request.get_data().decode('utf-8')
+        
+        # *** DEBUG LINE ADDED: Print raw JSON payload ***
+        # នេះសម្រាប់មើលថា Telegram បានផ្ញើអ្វីមកទាំងស្រុង
+        print(f"DEBUG: Raw JSON Payload Received: {json_string}")
+        
         update = types.Update.de_json(json_string)
         bot.process_new_updates([update])
         return '!', 200
@@ -41,13 +47,16 @@ def generate_label_button(message_text):
     """
     ពិនិត្យមើលសារ និងទាញយកទិន្នន័យ។
     """
-    # កែសម្រួល: ជំនួស \n ដោយ .*? ដើម្បីឱ្យ Regex ទន់ជាងមុន និងអាចចាប់យក Line Breaks គ្រប់ប្រភេទ
+    # កែសម្រួល: ឥឡូវ Regex គឺទន់ភ្លន់ខ្លាំងណាស់ (Aggressive)
+    # ប្រើ .*? នៅដើម និងចន្លោះដើម្បីរំលង Line Breaks និង Emoticons
     pattern = re.compile(r"""
-        👤\s*អតិថិជន\s*:\s*(?P<name>.*?)             # Capture Name
-        .*?📞\s*លេខទូរស័ព្ទ\s*:\s*(?P<phone>.*?)      # Capture Phone
-        .*?📍\s*ទីតាំង\s*:\s*(?P<location>.*?)        # Capture Location
-        .*?                                         # Skip intermediate content
-        សរុបចុងក្រោយ\s*:\s*\$(?P<total>[\d\.]+)\s* # Capture Final Total
+        .*?                                             # (NEW) Skip everything before the first tag (e.g. ✅...)
+        👤\s*អតិថិជន\s*:\s*(?P<name>.*?)                # Capture Name
+        .*?📞\s*លេខទូរស័ព្ទ\s*:\s*(?P<phone>.*?)         # Capture Phone
+        .*?📍\s*ទីតាំង\s*:\s*(?P<location>.*?)           # Capture Location
+        .*?                                             # Skip all product, address, and mid-section data
+        សរុបចុងក្រោយ\s*:\s*\$\s*(?P<total>[\d\.]+)\s* # Capture Final Total (Allowing space after $ sign)
+        .*?                                             # Skip everything after total (like COD, Delivery methods)
     """, re.VERBOSE | re.DOTALL) # DOTALL ធ្វើឱ្យ . អាចចាប់យក Line Breaks
 
     match = pattern.search(message_text)
