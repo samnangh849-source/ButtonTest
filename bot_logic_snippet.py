@@ -8,18 +8,17 @@ from telebot import TeleBot, types
 from flask import Flask, request, abort # ត្រូវការ Flask សម្រាប់ Webhook
 
 # ==================== កំណត់រចនាសម្ព័ន្ធ Bot & Server ====================
-# !!! 1. ត្រូវប្តូរ Token នេះ
+# !!! 1. ត្រូវប្តូរ Token នេះ (ត្រូវតែជា Token ពិតប្រាកដរបស់អ្នក)
 BOT_TOKEN = "8076401419:AAEIBzxnT3XGRA96XIVspbxKpLHfywFqm9k" 
 
-# !!! 2. ត្រូវប្តូរ URL នេះ (ទៅជា HTTPS URL របស់ Label Printer សាធារណៈ)
+# !!! 2. ត្រូវប្តូរ URL នេះ (ទៅជា HTTPS URL របស់ Label Printer HTML ដែលដាក់ Host សាធារណៈ)
 BOT_BASE_URL = "https://samnangh849-source.github.io/ButtonTest/"
 
-# !!! 3. កំណត់ URL របស់ Server របស់ Bot ដែលនឹងទទួល Webhook (ឧទាហរណ៍: https://my-telegram-bot.render.com/)
+# !!! 3. កំណត់ URL របស់ Server របស់ Bot ដែលនឹងទទួល Webhook (ដែលបានមកពី Render)
 WEBHOOK_URL_BASE = "https://buttontest-zqa5.onrender.com" 
 WEBHOOK_URL_PATH = f"/{BOT_TOKEN}"
 
 # កំណត់ Port សម្រាប់ Flask (ប្រើ Environment Variable ឬ 5000)
-# សម្រាប់ Free Hosting ដូចជា Render, Vercel ត្រូវតែប្រើ PORT ដែលគេផ្តល់ឱ្យ
 PORT = int(os.environ.get('PORT', 5000))
 
 bot = TeleBot(BOT_TOKEN)
@@ -97,30 +96,26 @@ def handle_all_messages(message):
                 reply_markup=inline_keyboard,
                 parse_mode='HTML'
             )
-            print(f"បានផ្ញើសារដែលមានប៊ូតុងជោគជ័យទៅកាន់ Chat ID: {message.chat.id}")
-            print(f"URL សម្រាប់ Label: {label_url}") 
+            # សម្រាប់ Console Log នៅលើ Render
+            print(f"INFO: Success sending button to Chat ID: {message.chat.id}")
+            print(f"INFO: Label URL: {label_url}") 
             
         except Exception as e:
-            print(f"មានបញ្ហាពេលផ្ញើសារ: {e}")
+            print(f"ERROR: Failed to send message: {e}")
             
     else:
-        print(f"សារមិនត្រូវតាមទម្រង់ក្នុង Chat ID: {message.chat.id}")
+        # មិនធ្វើអ្វីទាំងអស់បើសារមិនត្រូវទម្រង់
+        pass 
 
 # ==================== Bot Startup (Flask) ====================
 if __name__ == '__main__':
-    print("Telegram Bot កំពុងចាប់ផ្តើម (Webhook)...")
+    print("INFO: Telegram Bot is starting (Webhook)...")
     
     # កំណត់ Webhook ទៅកាន់ URL របស់ Hosting របស់អ្នក
     bot.remove_webhook()
     bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH)
     
     # ចាប់ផ្តើម Flask Server
-    app.run(host='0.0.0.0', port=PORT)
-
-# ==================== Polling Startup (ជម្រើសចាស់ - សម្រាប់ Local Testing) ====================
-# if __name__ == '__main__':
-#     print("Telegram Bot កំពុងចាប់ផ្តើម (Polling)...")
-#     try:
-#         bot.polling(none_stop=True)
-#     except Exception as e:
-#         print(f"មានបញ្ហាក្នុងការចាប់ផ្តើម Bot: {e}")
+    # ប្រើ gunicorn ដើម្បីចាប់ផ្តើម Flask App ក្នុង Production Environment 
+    # (ប៉ុន្តែក្នុងកូដនេះ Render ប្រើ gunicorn ដោយខ្លួនឯងតាមរយៈ Procfile)
+    # app.run(host='0.0.0.0', port=PORT) 
