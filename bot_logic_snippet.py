@@ -5,6 +5,7 @@ import re
 import urllib.parse
 import os
 import json # *** NEW: ត្រូវការសម្រាប់ Debugging JSON Payload ***
+import sys # *** NEW: ត្រូវការសម្រាប់ Flush Log ***
 from telebot import TeleBot, types
 from flask import Flask, request, abort # ត្រូវការ Flask សម្រាប់ Webhook
 
@@ -35,6 +36,7 @@ def webhook():
         # *** DEBUG LINE ADDED: Print raw JSON payload ***
         # នេះសម្រាប់មើលថា Telegram បានផ្ញើអ្វីមកទាំងស្រុង
         print(f"DEBUG: Raw JSON Payload Received: {json_string}")
+        sys.stdout.flush() # *** NEW: បង្ខំឱ្យ Log ត្រូវបានបង្ហាញភ្លាមៗ ***
         
         update = types.Update.de_json(json_string)
         bot.process_new_updates([update])
