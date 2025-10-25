@@ -120,11 +120,11 @@ def handle_all_messages(message):
     if inline_keyboard:
         try:
             # Send the original message back but with the Inline Keyboard attached
+            # FIX: Removed parse_mode='HTML' to avoid parsing errors with special characters in message.text
             bot.send_message(
                 chat_id=message.chat.id,
                 text=message.text, 
-                reply_markup=inline_keyboard,
-                parse_mode='HTML'
+                reply_markup=inline_keyboard
             )
             print(f"INFO: Success sending button to Chat ID: {message.chat.id}")
             print(f"INFO: Label URL: {label_url}") 
