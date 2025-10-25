@@ -1,10 +1,6 @@
-# នេះគឺជាកូដសម្រាប់ដំណើរការ Bot ដោយប្រើ Webhook (ល្អបំផុតសម្រាប់ Free Hosting)
-# Bot នឹងត្រូវប្រើ Web Framework ដូចជា Flask ដើម្បីទទួលសារពី Telegram។
-
 import re
 import urllib.parse
 import os
-import json 
 import sys # ត្រូវការសម្រាប់ Log ទៅកាន់ stderr
 from telebot import TeleBot, types
 from flask import Flask, request, abort 
@@ -32,11 +28,6 @@ bot = TeleBot(BOT_TOKEN)
 app = Flask(__name__)
 # ========================================================================
 
-# ជំនួស print() ធម្មតាដោយ Log ទៅកាន់ stderr
-def log_message(level, message):
-    sys.stderr.write(f"{level}: {message}\n")
-    sys.stderr.flush()
-
 # ==================== Webhook Route ====================
 @app.route(WEBHOOK_URL_PATH, methods=['POST'])
 def webhook():
@@ -44,7 +35,8 @@ def webhook():
         json_string = request.get_data().decode('utf-8')
         
         # នេះសម្រាប់មើលថា Telegram បានផ្ញើអ្វីមកទាំងស្រុង
-        log_message("DEBUG", f"Raw JSON Payload Received: {json_string}")
+        print(f"DEBUG: Raw JSON Payload Received: {json_string}")
+        sys.stdout.flush() # បង្ខំ Log ឱ្យបង្ហាញភ្លាមៗ
         
         update = types.Update.de_json(json_string)
         bot.process_new_updates([update])
@@ -65,11 +57,12 @@ def test_handler(message):
             "Bot ដំណើរការហើយ! Chat ID របស់អ្នកគឺ: `" + str(message.chat.id) + "`",
             parse_mode='Markdown'
         )
-        log_message("INFO", "Test message sent successfully.")
+        print("INFO: Test message sent successfully.")
+        
     except Exception as e:
         # បង្ហាញ Error Code ក្នុង Log ពេលបរាជ័យ
-        log_message("ERROR", f"Failed to send test message. Check Bot Permissions or Token: {e}")
-
+        print(f"ERROR: Failed to send test message (Chat ID: {message.chat.id}). Check Bot Permissions or Token: {e}")
+        sys.stdout.flush() # បង្ខំ Log កំហុសឱ្យបង្ហាញ
 
 # ==================== Functionality ====================
 def generate_label_button(message_text):
@@ -118,7 +111,7 @@ def handle_all_messages(message):
     """
     Handler សម្រាប់សារអត្ថបទទាំងអស់។
     """
-    log_message("DEBUG", f"Message text received: {message.text}") 
+    print(f"DEBUG: Message text received: {message.text}") 
     
     inline_keyboard, label_url = generate_label_button(message.text)
 
@@ -130,19 +123,20 @@ def handle_all_messages(message):
                 reply_markup=inline_keyboard,
                 parse_mode='HTML'
             )
-            log_message("INFO", f"Success sending button to Chat ID: {message.chat.id}")
-            log_message("INFO", f"Label URL: {label_url}") 
+            print(f"INFO: Success sending button to Chat ID: {message.chat.id}")
+            print(f"INFO: Label URL: {label_url}") 
             
         except Exception as e:
-            log_message("ERROR", f"Failed to send button message: {e}")
+            print(f"ERROR: Failed to send button message: {e}")
+            sys.stdout.flush()
             
     else:
-        log_message("DEBUG", f"Regex failed to match for Chat ID: {message.chat.id}") 
+        print(f"DEBUG: Regex failed to match for Chat ID: {message.chat.id}") 
         pass 
 
 # ==================== Bot Startup (Flask) ====================
 if __name__ == '__main__':
-    log_message("INFO", "Telegram Bot is starting (Webhook)...")
+    print("INFO: Telegram Bot is starting (Webhook)...")
     
     # កំណត់ Webhook ទៅកាន់ URL របស់ Hosting របស់អ្នក
     bot.remove_webhook()
