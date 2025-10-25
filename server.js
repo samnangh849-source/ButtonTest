@@ -15,7 +15,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // កំណត់ Webhook
-bot.setWebhook(FULL_WEBHOOK_URL).then(status => {
+bot.setWebHook(FULL_WEBHOOK_URL).then(status => {
     console.log(`Webhook set to ${FULL_WEBHOOK_URL}: ${status}`);
 }).catch(err => {
     console.error('Error setting webhook:', err);
@@ -346,3 +346,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
