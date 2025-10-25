@@ -6,36 +6,37 @@ import traceback # ត្រូវការសម្រាប់បង្ហា�
 from telebot import TeleBot, types
 from flask import Flask, request, abort 
 
-# ==================== កំណត់រចនាសម្ព័ន្ធ Bot & Server ====================
-# !!! 1. Token ត្រូវបានកំណត់តាមរយៈ Render Environment Variable (ល្អបំផុតសម្រាប់ Production)
-# !!! ខ្ញុំបានដាក់ Token របស់អ្នកជាតម្លៃលំនាំដើមវិញ ដើម្បីជៀសវាងការបរាជ័យពេលចាប់ផ្តើម
-BOT_TOKEN_FALLBACK = "7976723335:AAHfuSf-umdTV3kQUd3CbM3Z7xvHGqmHMe0"
-BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', BOT_TOKEN_FALLBACK) 
+# ==================== CONFIGURATION (MUST BE UPDATED) ====================
+# The token is read from the TELEGRAM_BOT_TOKEN environment variable.
+# !!! IMPORTANT: For security, never hardcode the real token here.
+BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN') 
+if not BOT_TOKEN:
+    print("ERROR: TELEGRAM_BOT_TOKEN environment variable is not set.")
+    sys.exit(1)
 
-# !!! 2. ត្រូវប្តូរ URL នេះ (ទៅជា HTTPS URL របស់ Label Printer HTML ដែលដាក់ Host សាធារណៈ)
+# !!! 2. UPDATE THIS URL: The public HTTPS URL of your label_printer.html file
+# Example: "https://your-domain.github.io/label_printer.html"
 BOT_BASE_URL = "https://samnangh849-source.github.io/ButtonTest/label_printer.html"
 
-# !!! 3. កំណត់ URL របស់ Server របស់ Bot ដែលនឹងទទួល Webhook (ដែលបានមកពី Render)
+# !!! 3. UPDATE THIS URL: The base HTTPS URL of your deployed bot server (e.g., Render)
 WEBHOOK_URL_BASE = "https://buttontest-1.onrender.com" 
-# ផ្លាស់ប្តូរ Webhook Path ទៅជា /webhook វិញដើម្បីជៀសវាង Token Path Error
 WEBHOOK_URL_PATH = f"/webhook" 
 
-# កំណត់ Port សម្រាប់ Flask (ប្រើ Environment Variable ឬ 5000)
 PORT = int(os.environ.get('PORT', 5000))
-
-# មិនមានការពិនិត្យ sys.exit(1) ទៀតទេ ព្រោះយើងបានដាក់ Token ជា fallback រួចហើយ
 
 bot = TeleBot(BOT_TOKEN)
 app = Flask(__name__)
+# ========================================================================
+
 # ==================== Webhook Route ====================
 @app.route(WEBHOOK_URL_PATH, methods=['POST'])
 def webhook():
     if request.headers.get('content-type') == 'application/json':
         json_string = request.get_data().decode('utf-8')
         
-        # នេះសម្រាប់មើលថា Telegram បានផ្ញើអ្វីមកទាំងស្រុង
+        # Log the received payload for debugging
         print(f"DEBUG: Raw JSON Payload Received: {json_string}")
-        sys.stdout.flush() # បង្ខំ Log ឱ្យបង្ហាញភ្លាមៗ
+        sys.stdout.flush() 
         
         update = types.Update.de_json(json_string)
         bot.process_new_updates([update])
@@ -47,10 +48,9 @@ def webhook():
 @bot.message_handler(commands=['test'])
 def test_handler(message):
     """
-    Handler សម្រាប់សាកល្ប្បងថាតើ Bot អាចផ្ញើសារបានដែរឬទេ?
+    Handler to test if the Bot can send a message.
     """
     try:
-        # ប្រើ parse_mode='Markdown' ធម្មតាដើម្បីជៀសវាងកំហុស formatting
         bot.send_message(
             message.chat.id, 
             "Bot ដំណើរការហើយ! Chat ID របស់អ្នកគឺ: `" + str(message.chat.id) + "`",
@@ -59,7 +59,6 @@ def test_handler(message):
         print("INFO: Test message sent successfully.")
         
     except Exception as e:
-        # បង្ហាញ Error Code ក្នុង Log ពេលបរាជ័យ (ប្រើ traceback ដើម្បីបង្ខំ Log)
         sys.stderr.write(f"ERROR: Failed to send test message (Chat ID: {message.chat.id}). Full Traceback:\n")
         sys.stderr.write(traceback.format_exc())
         sys.stderr.flush()
@@ -67,14 +66,14 @@ def test_handler(message):
 # ==================== Functionality ====================
 def generate_label_button(message_text):
     """
-    ពិនិត្យមើលសារ និងទាញយកទិន្នន័យ។
+    Checks the message for required data and constructs the print button URL.
     """
-    # Regex ថ្មី: ប្រើ [^\n]*? ដើម្បីចាប់យកទិន្នន័យរហូតដល់បន្ទាត់ថ្មី (\n)
+    # Regex is designed to be highly flexible to capture multi-line Khmer text
     pattern = re.compile(r"""
-        [\s\S]*?អតិថិជន.*?:\s*(?P<name>[^\n]*?)                # 1. Name: ចាប់ដល់បន្ទាត់ថ្មី
-        [\s\S]*?លេខទូរស័ព្ទ.*?:\s*(?P<phone>[^\n]*?)         # 2. Phone: ចាប់ដល់បន្ទាត់ថ្មី
-        [\s\S]*?ទីតាំង.*?:\s*(?P<location>[^\n]*?)           # 3. Location: ចាប់ដល់បន្ទាត់ថ្មី
-        [\s\S]*?សរុបចុងក្រោយ.*?:\s*\$\s*(?P<total>[\d\.]+)\s* # 4. Total: ចាប់យកលេខ
+        [\s\S]*?អតិថិជន.*?:\s*(?P<name>.*?)                # 1. Name
+        [\s\S]*?លេខទូរស័ព្ទ.*?:\s*(?P<phone>.*?)         # 2. Phone
+        [\s\S]*?ទីតាំង.*?:\s*(?P<location>.*?)           # 3. Location
+        [\s\S]*?សរុបចុងក្រោយ.*?:\s*\$\s*(?P<total>[\d\.]+)\s* # 4. Total (must contain digits and/or dot after $)
         [\s\S]*?$                                     # Match till the end
     """, re.VERBOSE | re.DOTALL) 
 
@@ -93,8 +92,12 @@ def generate_label_button(message_text):
             'location': location,
             'total': total_amount
         }
+        
+        # urlencode correctly handles special characters and Khmer text
         query_string = urllib.parse.urlencode(params)
-        label_url = f"{BOT_BASE_URL}label_printer.html?{query_string}"
+        
+        # *** FIX APPLIED HERE: BOT_BASE_URL already contains the file name ***
+        label_url = f"{BOT_BASE_URL}?{query_string}" 
 
         keyboard = types.InlineKeyboardMarkup()
         button = types.InlineKeyboardButton("ចុចដើម្បីព្រីន Label 📦", url=label_url)
@@ -108,7 +111,7 @@ def generate_label_button(message_text):
 @bot.message_handler(content_types=['text'])
 def handle_all_messages(message):
     """
-    Handler សម្រាប់សារអត្ថបទទាំងអស់។
+    Handler for all text messages.
     """
     print(f"DEBUG: Message text received: {message.text}") 
     
@@ -116,6 +119,7 @@ def handle_all_messages(message):
 
     if inline_keyboard:
         try:
+            # Send the original message back but with the Inline Keyboard attached
             bot.send_message(
                 chat_id=message.chat.id,
                 text=message.text, 
@@ -126,7 +130,6 @@ def handle_all_messages(message):
             print(f"INFO: Label URL: {label_url}") 
             
         except Exception as e:
-            # បង្ហាញ Error Code ក្នុង Log ពេលបរាជ័យ
             sys.stderr.write(f"ERROR: Failed to send button message: {e}\n")
             sys.stderr.flush()
             
@@ -138,8 +141,10 @@ def handle_all_messages(message):
 if __name__ == '__main__':
     print("INFO: Telegram Bot is starting (Webhook)...")
     
-    # កំណត់ Webhook ទៅកាន់ URL របស់ Hosting របស់អ្នក
+    # Set the webhook to your hosting URL
     bot.remove_webhook()
     bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH)
     
-    # មិនចាំបាច់ចាប់ផ្តើម Flask Server ទេ ព្រោះ Render ប្រើ gunicorn ដោយខ្លួនឯង។
+    # Flask server startup is managed by Gunicorn in production (via Procfile)
+    # The code below is only needed for local testing, but we keep it commented out.
+    # app.run(host="0.0.0.0", port=PORT)
