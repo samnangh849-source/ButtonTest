@@ -71,12 +71,13 @@ def generate_label_button(message_text):
     """
     ពិនិត្យមើលសារ និងទាញយកទិន្នន័យ។
     """
-    # Regex ត្រូវបានធ្វើឱ្យទន់ភ្លន់បំផុត (Aggressive) - ឥឡូវនេះចាប់ផ្តើមដោយ .*? ដើម្បីរំលង Emoji ដើម
+    # Regex ត្រូវបានធ្វើឱ្យទន់ភ្លន់បំផុត (Aggressive) ដោយប្រើ [\s\S]*?
     pattern = re.compile(r"""
-        .*?អតិថិជន\s*:\s*(?P<name>.*?)                # ផ្ដល់សិទ្ធិឱ្យ Emoji ណាមួយនៅពីមុខ 👤
-        .*?លេខទូរស័ព្ទ\s*:\s*(?P<phone>.*?)         # ផ្ដល់សិទ្ធិឱ្យ Emoji ណាមួយនៅពីមុខ 📞
-        .*?ទីតាំង\s*:\s*(?P<location>.*?)           # ផ្ដល់សិទ្ធិឱ្យ Emoji ណាមួយនៅពីមុខ 📍
-        .*?សរុបចុងក្រោយ\s*:\s*\$\s*(?P<total>[\d\.]+)\s* .*? # ផ្ដល់សិទ្ធិឱ្យ Emoji ណាមួយនៅពីមុខ 💰
+        [\s\S]*?អតិថិជន\s*:\s*(?P<name>.*?)                # 1. Name
+        [\s\S]*?លេខទូរស័ព្ទ\s*:\s*(?P<phone>.*?)         # 2. Phone
+        [\s\S]*?ទីតាំង\s*:\s*(?P<location>.*?)           # 3. Location
+        [\s\S]*?សរុបចុងក្រោយ\s*:\s*\$\s*(?P<total>[\d\.]+)\s* # 4. Total
+        [\s\S]*?$                                     # Match till the end
     """, re.VERBOSE | re.DOTALL) 
 
     match = pattern.search(message_text)
@@ -144,3 +145,4 @@ if __name__ == '__main__':
     bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH)
     
     # មិនចាំបាច់ចាប់ផ្តើម Flask Server ទេ ព្រោះ Render ប្រើ gunicorn ដោយខ្លួនឯង។
+
