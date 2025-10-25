@@ -9,7 +9,7 @@ from flask import Flask, request, abort
 # ==================== កំណត់រចនាសម្ព័ន្ធ Bot & Server ====================
 # !!! 1. Token ត្រូវបានកំណត់តាមរយៈ Render Environment Variable (ល្អបំផុតសម្រាប់ Production)
 # !!! ខ្ញុំបានដាក់ Token របស់អ្នកជាតម្លៃលំនាំដើមវិញ ដើម្បីជៀសវាងការបរាជ័យពេលចាប់ផ្តើម
-BOT_TOKEN_FALLBACK = "8064911636:AAEmwS2BzcTue9uYb3M94dPdy3wBzWCOFWw"
+BOT_TOKEN_FALLBACK = "7976723335:AAHfuSf-umdTV3kQUd3CbM3Z7xvHGqmHMe0"
 BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', BOT_TOKEN_FALLBACK) 
 
 # !!! 2. ត្រូវប្តូរ URL នេះ (ទៅជា HTTPS URL របស់ Label Printer HTML ដែលដាក់ Host សាធារណៈ)
@@ -71,12 +71,12 @@ def generate_label_button(message_text):
     """
     ពិនិត្យមើលសារ និងទាញយកទិន្នន័យ។
     """
-    # Regex ត្រូវបានធ្វើឱ្យទន់ភ្លន់បំផុត (Aggressive) ដោយប្រើ [\s\S]*?
+    # Regex ត្រូវបានធ្វើឱ្យទន់ភ្លន់បំផុត (Hyper-flexible) ដើម្បីចាប់យក Emoji/Space នៅចន្លោះ
     pattern = re.compile(r"""
-        [\s\S]*?អតិថិជន\s*:\s*(?P<name>.*?)                # 1. Name
-        [\s\S]*?លេខទូរស័ព្ទ\s*:\s*(?P<phone>.*?)         # 2. Phone
-        [\s\S]*?ទីតាំង\s*:\s*(?P<location>.*?)           # 3. Location
-        [\s\S]*?សរុបចុងក្រោយ\s*:\s*\$\s*(?P<total>[\d\.]+)\s* # 4. Total
+        [\s\S]*?អតិថិជន.*?:\s*(?P<name>.*?)                # 1. Name
+        [\s\S]*?លេខទូរស័ព្ទ.*?:\s*(?P<phone>.*?)         # 2. Phone
+        [\s\S]*?ទីតាំង.*?:\s*(?P<location>.*?)           # 3. Location
+        [\s\S]*?សរុបចុងក្រោយ.*?:\s*\$\s*(?P<total>[\d\.]+)\s* # 4. Total
         [\s\S]*?$                                     # Match till the end
     """, re.VERBOSE | re.DOTALL) 
 
@@ -145,4 +145,5 @@ if __name__ == '__main__':
     bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH)
     
     # មិនចាំបាច់ចាប់ផ្តើម Flask Server ទេ ព្រោះ Render ប្រើ gunicorn ដោយខ្លួនឯង។
+
 
