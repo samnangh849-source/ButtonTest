@@ -9,7 +9,7 @@ from flask import Flask, request, abort
 # ==================== កំណត់រចនាសម្ព័ន្ធ Bot & Server ====================
 # !!! 1. Token ត្រូវបានកំណត់តាមរយៈ Render Environment Variable (ល្អបំផុតសម្រាប់ Production)
 # !!! ខ្ញុំបានដាក់ Token របស់អ្នកជាតម្លៃលំនាំដើមវិញ ដើម្បីជៀសវាងការបរាជ័យពេលចាប់ផ្តើម
-BOT_TOKEN_FALLBACK = "7976723335:AAHfuSf-umdTV3kQUd3CbM3Z7xvHGqmHMe0"
+BOT_TOKEN_FALLBACK = "8064911636:AAEmwS2BzcTue9uYb3M94dPdy3wBzWCOFWw"
 BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', BOT_TOKEN_FALLBACK) 
 
 # !!! 2. ត្រូវប្តូរ URL នេះ (ទៅជា HTTPS URL របស់ Label Printer HTML ដែលដាក់ Host សាធារណៈ)
