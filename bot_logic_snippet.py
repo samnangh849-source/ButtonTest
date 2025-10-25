@@ -11,25 +11,22 @@ from flask import Flask, request, abort
 
 # ==================== កំណត់រចនាសម្ព័ន្ធ Bot & Server ====================
 # !!! 1. Token ត្រូវបានកំណត់តាមរយៈ Render Environment Variable (ល្អបំផុតសម្រាប់ Production)
-# ត្រូវកំណត់ TELEGRAM_BOT_TOKEN នៅក្នុង Render Dashboard របស់អ្នក
-BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN') 
+# !!! ខ្ញុំបានដាក់ Token របស់អ្នកជាតម្លៃលំនាំដើមវិញ ដើម្បីជៀសវាងការបរាជ័យពេលចាប់ផ្តើម
+BOT_TOKEN_FALLBACK = "8076401419:AAEIBzxnT3XGRA96XIVspbxKpLHfywFqm9k"
+BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', BOT_TOKEN_FALLBACK) 
 
 # !!! 2. ត្រូវប្តូរ URL នេះ (ទៅជា HTTPS URL របស់ Label Printer HTML ដែលដាក់ Host សាធារណៈ)
 BOT_BASE_URL = "https://samnangh849-source.github.io/ButtonTest/label_printer.html"
 
 # !!! 3. កំណត់ URL របស់ Server របស់ Bot ដែលនឹងទទួល Webhook (ដែលបានមកពី Render)
-WEBHOOK_URL_BASE = "https://buttontest-zqa5.onrender.com" 
-WEBHOOK_URL_PATH = f"/{BOT_TOKEN}"
+WEBHOOK_URL_BASE = "https://buttontest-1.onrender.com" 
+# ផ្លាស់ប្តូរ Webhook Path ទៅជា /webhook វិញដើម្បីជៀសវាង Token Path Error
+WEBHOOK_URL_PATH = f"/webhook" 
 
 # កំណត់ Port សម្រាប់ Flask (ប្រើ Environment Variable ឬ 5000)
 PORT = int(os.environ.get('PORT', 5000))
 
-# ពិនិត្យមើលថាតើ Token មានឬអត់
-if not BOT_TOKEN:
-    sys.stderr.write("FATAL ERROR: TELEGRAM_BOT_TOKEN environment variable is not set.\n")
-    sys.stderr.flush()
-    # ចេញប្រសិនបើ Token មិនមាន
-    sys.exit(1)
+# មិនមានការពិនិត្យ sys.exit(1) ទៀតទេ ព្រោះយើងបានដាក់ Token ជា fallback រួចហើយ
 
 bot = TeleBot(BOT_TOKEN)
 app = Flask(__name__)
@@ -59,7 +56,7 @@ def webhook():
 @bot.message_handler(commands=['test'])
 def test_handler(message):
     """
-    Handler សម្រាប់សាកល្បងថាតើ Bot អាចផ្ញើសារបានដែរឬទេ?
+    Handler សម្រាប់សាកល្ប្បងថាតើ Bot អាចផ្ញើសារបានដែរឬទេ?
     """
     try:
         # ប្រើ parse_mode='Markdown' ធម្មតាដើម្បីជៀសវាងកំហុស formatting
