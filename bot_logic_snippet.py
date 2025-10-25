@@ -27,8 +27,6 @@ PORT = int(os.environ.get('PORT', 5000))
 
 bot = TeleBot(BOT_TOKEN)
 app = Flask(__name__)
-# ========================================================================
-
 # ==================== Webhook Route ====================
 @app.route(WEBHOOK_URL_PATH, methods=['POST'])
 def webhook():
@@ -71,12 +69,12 @@ def generate_label_button(message_text):
     """
     ពិនិត្យមើលសារ និងទាញយកទិន្នន័យ។
     """
-    # Regex ត្រូវបានធ្វើឱ្យទន់ភ្លន់បំផុត (Hyper-flexible) ដើម្បីចាប់យក Emoji/Space នៅចន្លោះ
+    # Regex ថ្មី: ប្រើ [^\n]*? ដើម្បីចាប់យកទិន្នន័យរហូតដល់បន្ទាត់ថ្មី (\n)
     pattern = re.compile(r"""
-        [\s\S]*?អតិថិជន.*?:\s*(?P<name>.*?)                # 1. Name
-        [\s\S]*?លេខទូរស័ព្ទ.*?:\s*(?P<phone>.*?)         # 2. Phone
-        [\s\S]*?ទីតាំង.*?:\s*(?P<location>.*?)           # 3. Location
-        [\s\S]*?សរុបចុងក្រោយ.*?:\s*\$\s*(?P<total>[\d\.]+)\s* # 4. Total
+        [\s\S]*?អតិថិជន.*?:\s*(?P<name>[^\n]*?)                # 1. Name: ចាប់ដល់បន្ទាត់ថ្មី
+        [\s\S]*?លេខទូរស័ព្ទ.*?:\s*(?P<phone>[^\n]*?)         # 2. Phone: ចាប់ដល់បន្ទាត់ថ្មី
+        [\s\S]*?ទីតាំង.*?:\s*(?P<location>[^\n]*?)           # 3. Location: ចាប់ដល់បន្ទាត់ថ្មី
+        [\s\S]*?សរុបចុងក្រោយ.*?:\s*\$\s*(?P<total>[\d\.]+)\s* # 4. Total: ចាប់យកលេខ
         [\s\S]*?$                                     # Match till the end
     """, re.VERBOSE | re.DOTALL) 
 
@@ -145,5 +143,3 @@ if __name__ == '__main__':
     bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH)
     
     # មិនចាំបាច់ចាប់ផ្តើម Flask Server ទេ ព្រោះ Render ប្រើ gunicorn ដោយខ្លួនឯង។
-
-
