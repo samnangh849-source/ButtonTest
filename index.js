@@ -30,7 +30,8 @@ bot.getMe().then((me) => {
     console.log(`បានកំណត់អត្តសញ្ញាណ Bot ជោគជ័យ: ${me.username} (ID: ${me.id})`);
     BOT_ID = me.id.toString(); // រក្សាទុក ID ជា String
 }).catch((err) => {
-    console.error("បរាជ័យក្នុងការ GetMe:", err);
+    // [កែសម្រួល] កុំ Error ខ្លាំងពេក, គ្រាន់តែ Log ទុក
+    console.warn(`បរាជ័យក្នុងការ GetMe (នឹងប្ដូរទៅប្រើ BOT_USERNAME វិញ):`, err.message);
 });
 
 const app = express();
@@ -46,8 +47,8 @@ console.log(`Bot កំពុងដំណើរការ... Webhook ត្រូ
 
 // ត្រង Regex សម្រាប់ទម្រង់សាររបស់អ្នក
 // ប្រើ Flag 's' ដើម្បីឱ្យ '.' អាចចាប់យក newline (\n) បាន
-// [កែសម្រួល] នេះគឺជា REGEX ថ្មីដែលត្រូវនឹងទម្រង់សារពិតប្រាកដរបស់អ្នក
-const orderRegex = /👤 អតិថិជន: (.*?)\n📞 លេខទូរស័ព្ទ: (.*?)\n📍 ទីតាំង: (.*?)\n(?:🏠 អាសយដ្ឋាន: (.*?)\n)?.*?-\s*សរុបចុងក្រោយ: \$(.*?)\n\s*(.*?)\n\n🚚 វិធីសាស្រ្តដឹកជញ្ជូន: (.*?)(?:\n|$)/s;
+// [កែសម្រួល] កែ `\n\n` ទៅជា `\n\s*\n` ដើម្បីឱ្យកាន់តែបត់បែន
+const orderRegex = /👤 អតិថិជន: (.*?)\n📞 លេខទូរស័ព្ទ: (.*?)\n📍 ទីតាំង: (.*?)\n(?:🏠 អាសយដ្ឋាន: (.*?)\n)?.*?-\s*សរុបចុងក្រោយ: \$(.*?)\n\s*(.*?)\n\s*\n🚚 វិធីសាស្រ្តដឹកជញ្ជូន: (.*?)(?:\n|$)/s;
 
 // ស្ដាប់រាល់សារទាំងអស់ (ទាំង message ក្នុង group និង channel post)
 bot.on('message', (msg) => {
@@ -76,13 +77,26 @@ async function handlePotentialOrderMessage(msg) {
     console.log('L1: ជាសារ Text (OK)');
 
     // 2. ពិនិត្យថាផ្ញើដោយ Bot ខ្លួនឯង
-    // [កែសម្រួល] ប្រើ BOT_ID ជំនួស BOT_USERNAME ព្រោះវាត្រឹមត្រូវជាង
-    console.log(`L2: ពិនិត្យ ID... (Bot ID គឺ ${BOT_ID} | ID អ្នកផ្ញើគឺ ${msg.from.id})`);
-    if (!BOT_ID || msg.from.id.toString() !== BOT_ID) {
+    // [កែសម្រួល] បន្ថែមតក្កវិជ្ជា Fallback (ប្រសិនបើ GetMe បរាជ័យ)
+    console.log(`L2: ពិនិត្យអ្នកផ្ញើ... (Bot ID គឺ ${BOT_ID} | Bot Username គឺ ${BOT_USERNAME})`);
+    console.log(`L2: ... អ្នកផ្ញើសារ ID: ${msg.from.id} | Username: ${msg.from.username}`);
+    
+    let isFromSelf = false;
+    if (BOT_ID) {
+        // វិធីទី១ (ល្អបំផុត): ប្រើ ID
+        isFromSelf = (msg.from.id.toString() === BOT_ID);
+    } else {
+        // វិធីទី២ (Fallback): ប្រើ Username (ប្រសិនបើ GetMe បរាជ័យ)
+        // ក៏ត្រូវពិនិត្យ is_bot ដែរ ក្រែង User ផ្សេងមាន Username ដូច
+        isFromSelf = (msg.from.username === BOT_USERNAME && msg.from.is_bot);
+    }
+
+    if (!isFromSelf) {
         console.log(`L2: រំលង (សារនេះមិនមែនផ្ញើដោយ Bot ខ្លួនឯង)`);
         return;
     }
     console.log(`L2: ជាសារពី Bot ខ្លួនឯង (OK)`);
+
 
     // 3. ពិនិត្យមើលថាតើសារនេះមានប៊ូតុងរួចហើយឬនៅ
     if (msg.reply_markup) {
@@ -304,5 +318,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server កំពុងដំណើរការនៅលើ Port ${PORT}`);
 });
-
 
