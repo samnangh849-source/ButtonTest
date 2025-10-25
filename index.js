@@ -17,10 +17,21 @@ if (!TOKEN || !RENDER_URL || !BOT_USERNAME) {
 
 const bot = new TelegramBot(TOKEN);
 
+// [កែសម្រួល] បន្ថែមអថេរ (Variable) សម្រាប់ផ្ទុក Bot ID
+let BOT_ID = null;
+
 // --- ផ្នែក Bot Logic (ពិនិត្យ និងកែសម្រួលសារ) ---
 
 // ប្រើ Webhook ជំនួស Polling សម្រាប់ Render.com
 bot.setWebHook(FULL_WEBHOOK_URL);
+
+// [កែសម្រួល] ទៅទាញយក ID របស់ Bot ខ្លួនឯង
+bot.getMe().then((me) => {
+    console.log(`បានកំណត់អត្តសញ្ញាណ Bot ជោគជ័យ: ${me.username} (ID: ${me.id})`);
+    BOT_ID = me.id.toString(); // រក្សាទុក ID ជា String
+}).catch((err) => {
+    console.error("បរាជ័យក្នុងការ GetMe:", err);
+});
 
 const app = express();
 app.use(bodyParser.json());
@@ -54,22 +65,31 @@ async function handlePotentialOrderMessage(msg) {
     const messageId = msg.message_id;
     const messageText = msg.text || msg.caption; // យក Text
     
-    // 1. ពិនិត្យថាជាសារ Text
-    if (!messageText) return;
+    // [កែសម្រួល] បន្ថែម Log លម្អិត
+    console.log(`--- ទទួលបាន Update ក្នុង Chat ID: ${chatId}, Message ID: ${messageId} ---`);
 
-    // 2. ពិនិត្យថាផ្ញើដោយ Bot ខ្លួនឯង
-    // វិធីដែលល្អបំផុតគឺត្រូវដឹង ID របស់ Bot ខ្លួនឯង
-    // យើងអាចប្រើ username ជាការប្រៀបធៀបបណ្ដោះអាសន្ន
-    if (msg.from.username !== BOT_USERNAME || !msg.from.is_bot) {
-        // console.log(`រំលងសារពី: ${msg.from.username}`);
+    // 1. ពិនិត្យថាជាសារ Text
+    if (!messageText) {
+        console.log('L1: រំលង (មិនមែនជាសារ Text)');
         return;
     }
+    console.log('L1: ជាសារ Text (OK)');
+
+    // 2. ពិនិត្យថាផ្ញើដោយ Bot ខ្លួនឯង
+    // [កែសម្រួល] ប្រើ BOT_ID ជំនួស BOT_USERNAME ព្រោះវាត្រឹមត្រូវជាង
+    console.log(`L2: ពិនិត្យ ID... (Bot ID គឺ ${BOT_ID} | ID អ្នកផ្ញើគឺ ${msg.from.id})`);
+    if (!BOT_ID || msg.from.id.toString() !== BOT_ID) {
+        console.log(`L2: រំលង (សារនេះមិនមែនផ្ញើដោយ Bot ខ្លួនឯង)`);
+        return;
+    }
+    console.log(`L2: ជាសារពី Bot ខ្លួនឯង (OK)`);
 
     // 3. ពិនិត្យមើលថាតើសារនេះមានប៊ូតុងរួចហើយឬនៅ
     if (msg.reply_markup) {
-        // console.log(`រំលងសារ ${messageId} ព្រោះមានប៊ូតុងរួចហើយ`);
+        console.log(`L3: រំលង (សារ ${messageId} មានប៊ូតុងរួចហើយ)`);
         return;
     }
+    console.log(`L3: គ្មានប៊ូតុង (OK)`);
 
     // 4. ពិនិត្យមើលទម្រង់សារដោយប្រើ Regex
     const match = messageText.match(orderRegex);
@@ -135,8 +155,8 @@ async function handlePotentialOrderMessage(msg) {
             console.error(`បរាជ័យក្នុងការកែសម្រួលសារ ${messageId}:`, err.response ? err.response.body : err.message);
         }
     } else {
-        // [បន្ថែម] បង្ហាញ Log ប្រសិនបើរកមិនឃើញសារដែលត្រូវគ្នា
-        // console.log(`សារ ${messageId} មិនត្រូវនឹងទម្រង់ Regex`);
+        // [កែសម្រួល] បើក Log នេះ
+        console.log(`L4: រំលង (សារ ${messageId} មិនត្រូវនឹងទម្រង់ Regex)`);
     }
 }
 
@@ -284,4 +304,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server កំពុងដំណើរការនៅលើ Port ${PORT}`);
 });
+
 
