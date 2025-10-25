@@ -2,6 +2,7 @@ import re
 import urllib.parse
 import os
 import sys # ត្រូវការសម្រាប់ Log ទៅកាន់ stderr
+import traceback # ត្រូវការសម្រាប់បង្ហាញ Error ពេញលេញ
 from telebot import TeleBot, types
 from flask import Flask, request, abort 
 
@@ -18,9 +19,6 @@ BOT_BASE_URL = "https://samnangh849-source.github.io/ButtonTest/label_printer.ht
 WEBHOOK_URL_BASE = "https://buttontest-1.onrender.com" 
 # ផ្លាស់ប្តូរ Webhook Path ទៅជា /webhook វិញដើម្បីជៀសវាង Token Path Error
 WEBHOOK_URL_PATH = f"/webhook" 
-
-# កំណត់ Port សម្រាប់ Flask (ប្រើ Environment Variable ឬ 5000)
-PORT = int(os.environ.get('PORT', 5000))
 
 # កំណត់ Port សម្រាប់ Flask (ប្រើ Environment Variable ឬ 5000)
 PORT = int(os.environ.get('PORT', 5000))
@@ -63,8 +61,9 @@ def test_handler(message):
         print("INFO: Test message sent successfully.")
         
     except Exception as e:
-        # បង្ហាញ Error Code ក្នុង Log ពេលបរាជ័យ
-        sys.stderr.write(f"ERROR: Failed to send test message (Chat ID: {message.chat.id}). Check Bot Permissions or Token: {e}\n")
+        # បង្ហាញ Error Code ក្នុង Log ពេលបរាជ័យ (ប្រើ traceback ដើម្បីបង្ខំ Log)
+        sys.stderr.write(f"ERROR: Failed to send test message (Chat ID: {message.chat.id}). Full Traceback:\n")
+        sys.stderr.write(traceback.format_exc())
         sys.stderr.flush()
 
 # ==================== Functionality ====================
@@ -130,8 +129,9 @@ def handle_all_messages(message):
             print(f"INFO: Label URL: {label_url}") 
             
         except Exception as e:
-            print(f"ERROR: Failed to send button message: {e}")
-            sys.stdout.flush()
+            # បង្ហាញ Error Code ក្នុង Log ពេលបរាជ័យ
+            sys.stderr.write(f"ERROR: Failed to send button message: {e}\n")
+            sys.stderr.flush()
             
     else:
         print(f"DEBUG: Regex failed to match for Chat ID: {message.chat.id}") 
