@@ -22,6 +22,9 @@ WEBHOOK_URL_PATH = f"/webhook"
 # កំណត់ Port សម្រាប់ Flask (ប្រើ Environment Variable ឬ 5000)
 PORT = int(os.environ.get('PORT', 5000))
 
+# កំណត់ Port សម្រាប់ Flask (ប្រើ Environment Variable ឬ 5000)
+PORT = int(os.environ.get('PORT', 5000))
+
 # មិនមានការពិនិត្យ sys.exit(1) ទៀតទេ ព្រោះយើងបានដាក់ Token ជា fallback រួចហើយ
 
 bot = TeleBot(BOT_TOKEN)
@@ -61,8 +64,8 @@ def test_handler(message):
         
     except Exception as e:
         # បង្ហាញ Error Code ក្នុង Log ពេលបរាជ័យ
-        print(f"ERROR: Failed to send test message (Chat ID: {message.chat.id}). Check Bot Permissions or Token: {e}")
-        sys.stdout.flush() # បង្ខំ Log កំហុសឱ្យបង្ហាញ
+        sys.stderr.write(f"ERROR: Failed to send test message (Chat ID: {message.chat.id}). Check Bot Permissions or Token: {e}\n")
+        sys.stderr.flush()
 
 # ==================== Functionality ====================
 def generate_label_button(message_text):
