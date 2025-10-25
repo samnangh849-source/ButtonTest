@@ -123,42 +123,57 @@ def generate_label_button(message_text):
 def handle_all_messages(message):
     """
     Handler for all text messages.
+    Tries to EDIT the message to attach the button. If it fails (e.g., cannot edit user message), 
+    it falls back to sending a new confirmation message.
     """
     print(f"DEBUG: Message text received: {message.text}") 
     
-    # NEW SAFETY CHECK: Ignore messages sent by this bot itself to prevent infinite loops.
-    global BOT_ID
-    if BOT_ID and message.from_user.id == BOT_ID:
-        print(f"DEBUG: Ignoring message sent by this bot (ID: {BOT_ID}).")
-        return
+    # We allow the bot's own message to be processed here so it can EDIT its own confirmation message.
     
     inline_keyboard, label_url = generate_label_button(message.text)
 
     if inline_keyboard:
         try:
-            # FIX: Sending a generic confirmation message instead of the original message 
-            # text to avoid Telegram parsing errors with complex formatting/emojis.
-            confirmation_text = "✅ **Bot បានទាញយកទិន្នន័យដោយជោគជ័យ។**\n\nសូមចុចប៊ូតុងខាងក្រោមដើម្បីបោះពុម្ព Label នេះ។"
-            
-            bot.send_message(
+            # 1. Attempt to EDIT the *original message* (User or Bot) to attach the button.
+            # This fulfills the request to "edit the message it sent itself" or the user's desire 
+            # to attach the button directly to the formatted message.
+            bot.edit_message_reply_markup(
                 chat_id=message.chat.id,
-                text=confirmation_text, 
-                reply_markup=inline_keyboard,
-                # Using 'Markdown' for the confirmation_text
-                parse_mode='Markdown' 
+                message_id=message.message_id,
+                reply_markup=inline_keyboard
             )
-            print(f"INFO: Success sending button to Chat ID: {message.chat.id}")
-            print(f"INFO: Label URL: {label_url}") 
-            
-        except Exception as e:
-            # បង្ហាញ Error ក្នុង Log ពេលបរាជ័យ
-            sys.stderr.write(f"ERROR: Failed to send button message: {e}\n")
-            sys.stderr.flush()
+            print(f"INFO: Successfully EDITED message ({message.message_id}) reply markup for Chat ID: {message.chat.id}")
+
+        except Exception as edit_e:
+            # 2. If editing fails (e.g., Bot cannot edit a message sent by a normal user), 
+            # fall back to sending a new confirmation message.
+            try:
+                confirmation_text = "✅ **Bot បានទាញយកទិន្នន័យដោយជោគជ័យ។**\n\nសូមចុចប៊ូតុងខាងក្រោមដើម្បីបោះពុម្ព Label នេះ។"
+                
+                bot.send_message(
+                    chat_id=message.chat.id,
+                    text=confirmation_text, 
+                    reply_markup=inline_keyboard,
+                    parse_mode='Markdown' 
+                )
+                print(f"INFO: Edit failed, sent NEW confirmation message to Chat ID: {message.chat.id}")
+                sys.stderr.write(f"WARNING: Edit failed for message {message.message_id}: {edit_e}\n")
+                
+            except Exception as send_e:
+                # Final catch if sending the new message fails
+                sys.stderr.write(f"ERROR: Failed to send or edit message for Chat ID: {message.chat.id}. Full Traceback:\n")
+                sys.stderr.write(traceback.format_exc())
+                sys.stderr.flush()
+                
+        print(f"INFO: Label URL: {label_url}") 
             
     else:
-        print(f"DEBUG: Regex failed to match for Chat ID: {message.chat.id}") 
-        # Optional: You can add an error message to the user here if you want:
-        # bot.send_message(message.chat.id, "❌ រកមិនឃើញទិន្នន័យអតិថិជនត្រឹមត្រូវទេ។")
+        # If no Regex match, we should still ignore the bot's message to avoid unnecessary processing.
+        global BOT_ID
+        if BOT_ID and message.from_user.id == BOT_ID:
+             print(f"DEBUG: Ignoring bot's own message which did not match regex.")
+        else:
+             print(f"DEBUG: Regex failed to match for Chat ID: {message.chat.id}") 
         pass 
 
 # ==================== Bot Startup (Flask) ====================
