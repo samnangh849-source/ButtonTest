@@ -160,8 +160,12 @@ bot.onText(/\/addprintbutton/, async (msg) => {
         // ផ្ញើសារបញ្ជាក់ (ហើយលុបវិញបន្ទាប់ពី 5 វិនាទី)
         const confirmMsg = await bot.sendMessage(chatId, '✅ បានបន្ថែមប៊ូតុងព្រីនដោយជោគជ័យ!');
         setTimeout(() => {
-            bot.deleteMessage(chatId, msg.message_id); // លុប command /addprintbutton
-            bot.deleteMessage(chatId, confirmMsg.message_id); // លុបសារបញ្ជាក់
+            bot.deleteMessage(chatId, msg.message_id).catch(err => {
+                console.warn(`Could not delete command message: ${err.message}`);
+            }); // លុប command /addprintbutton
+            bot.deleteMessage(chatId, confirmMsg.message_id).catch(err => {
+                console.warn(`Could not delete confirm message: ${err.message}`);
+            }); // លុបសារបញ្ជាក់
         }, 5000);
 
     } catch (err) {
@@ -346,4 +350,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
 
