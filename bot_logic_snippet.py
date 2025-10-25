@@ -26,6 +26,17 @@ PORT = int(os.environ.get('PORT', 5000))
 
 bot = TeleBot(BOT_TOKEN)
 app = Flask(__name__)
+
+# NEW: Global variable to store the Bot's ID for the safety check
+BOT_ID = None
+try:
+    BOT_INFO = bot.get_me()
+    BOT_ID = BOT_INFO.id
+    print(f"INFO: Bot ID is {BOT_ID}")
+except Exception as e:
+    # This warning means the safety check will be skipped, but the bot will still run.
+    print(f"WARNING: Could not fetch Bot ID: {e}. Bot will not skip its own messages.")
+
 # ========================================================================
 
 # ==================== Webhook Route ====================
@@ -114,6 +125,12 @@ def handle_all_messages(message):
     Handler for all text messages.
     """
     print(f"DEBUG: Message text received: {message.text}") 
+    
+    # NEW SAFETY CHECK: Ignore messages sent by this bot itself to prevent infinite loops.
+    global BOT_ID
+    if BOT_ID and message.from_user.id == BOT_ID:
+        print(f"DEBUG: Ignoring message sent by this bot (ID: {BOT_ID}).")
+        return
     
     inline_keyboard, label_url = generate_label_button(message.text)
 
