@@ -119,22 +119,29 @@ def handle_all_messages(message):
 
     if inline_keyboard:
         try:
-            # Send the original message back but with the Inline Keyboard attached
-            # FIX: Removed parse_mode='HTML' to avoid parsing errors with special characters in message.text
+            # FIX: Sending a generic confirmation message instead of the original message 
+            # text to avoid Telegram parsing errors with complex formatting/emojis.
+            confirmation_text = "✅ **Bot បានទាញយកទិន្នន័យដោយជោគជ័យ។**\n\nសូមចុចប៊ូតុងខាងក្រោមដើម្បីបោះពុម្ព Label នេះ។"
+            
             bot.send_message(
                 chat_id=message.chat.id,
-                text=message.text, 
-                reply_markup=inline_keyboard
+                text=confirmation_text, 
+                reply_markup=inline_keyboard,
+                # Using 'Markdown' for the confirmation_text
+                parse_mode='Markdown' 
             )
             print(f"INFO: Success sending button to Chat ID: {message.chat.id}")
             print(f"INFO: Label URL: {label_url}") 
             
         except Exception as e:
+            # បង្ហាញ Error ក្នុង Log ពេលបរាជ័យ
             sys.stderr.write(f"ERROR: Failed to send button message: {e}\n")
             sys.stderr.flush()
             
     else:
         print(f"DEBUG: Regex failed to match for Chat ID: {message.chat.id}") 
+        # Optional: You can add an error message to the user here if you want:
+        # bot.send_message(message.chat.id, "❌ រកមិនឃើញទិន្នន័យអតិថិជនត្រឹមត្រូវទេ។")
         pass 
 
 # ==================== Bot Startup (Flask) ====================
