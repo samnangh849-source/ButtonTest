@@ -7,8 +7,7 @@
     <title>Label Printer (78x50mm)</title>
     <!-- Tailwind CSS សម្រាប់ភាពងាយស្រួលក្នុងការរចនា UI មើលទៅស្អាតនៅលើទូរស័ព្ទ -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- NEW: បន្ថែម QR Code Generator Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- DELETED: QR Code Generator Library removed -->
     <style>
         /* កំណត់ទម្រង់បោះពុម្ពសម្រាប់ទំហំ 78mm x 50mm */
         @page {
@@ -138,13 +137,7 @@
             font-weight: 700;
         }
 
-        /* NEW: Style សម្រាប់ QR Code container */
-        #qrcode-container {
-            width: auto;
-            display: flex;
-            justify-content: flex-end; /* តម្រឹម QR ទៅស្តាំ */
-            align-items: center;
-        }
+        /* DELETED: Style សម្រាប់ QR Code container removed */
         
         /* MODIFIED: កែសម្រួល Footer ឱ្យប្រើ Flex */
         .label-footer {
@@ -152,7 +145,7 @@
             padding-top: 0.5mm;
             border-top: 2px dashed #000;
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* MODIFIED: Center the text */
             align-items: center;
         }
         
@@ -226,10 +219,7 @@
         <!-- MODIFIED: កែសម្រួល Footer ឱ្យប្រើ Flex និងដាក់ QR Code នៅទីនេះ -->
         <div class="label-footer">
              <div class="small-text font-bold text-gray-700">សូមដឹកជញ្ជូនដោយប្រុងប្រយ័ត្ន! </div>
-             <!-- NEW: QR Code Placeholder moved here -->
-             <div id="qrcode-container">
-                 <!-- QR Code នឹងបង្កើតនៅទីនេះដោយ JavaScript -->
-             </div>
+             <!-- DELETED: QR Code Placeholder removed -->
         </div>
 
     </div>
@@ -306,22 +296,7 @@
             const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
             document.getElementById('label-date').textContent = dateStr;
 
-            // --- NEW: បង្កើត QR Code ---
-            try {
-                const fullUrl = window.location.href; // យក URL បច្ចុប្បន្ន
-                new QRCode(document.getElementById("qrcode-container"), {
-                    text: fullUrl,
-                    width: 38, // MODIFIED: កាត់បន្ថយទំហំ (ប្រហែល 10mm)
-                    height: 38,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.L // Low correction សម្រាប់កូដតូច
-                });
-            } catch (e) {
-                console.error("Failed to generate QR Code", e);
-                document.getElementById('qrcode-container').textContent = "QR Error";
-            }
-            // --- ចប់ផ្នែក QR Code ---
+            // --- DELETED: Block សម្រាប់បង្កើត QR Code ត្រូវបានដកចេញ ---
 
 
             loading.classList.add('hidden');
