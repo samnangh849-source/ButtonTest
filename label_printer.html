@@ -1,9 +1,9 @@
 <!-- នេះជាឯកសារ HTML តែមួយដែលដំណើរការជា Label Printing Service។ -->
-<!-- វានឹងអានទិន្នន័យពី URL, បង្ហាញក្នុងទំហំ 78mm x 50mm, និងត្រៀមសម្រាប់បោះពុម្ព។ -->
+<!-- វានឹងអានទិន្នន័យពី URL, បង្ហាញក្នុងទំហំ 78mm x 50mm, និងត្រៀមសម្រាប់បោះពម្ព។ -->
 <html lang="km">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
     <title>Label Printer (78mm x 50mm)</title>
     <!-- Tailwind CSS សម្រាប់ភាពងាយស្រួលក្នុងការរចនា UI មើលទៅស្អាតនៅលើទូរស័ព្ទ -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -148,6 +148,8 @@
         <!-- HEADER -->
         <div class="label-header">
             <span class="font-bold text-xs">Gadme Store</span>
+            <!-- NEW: បង្ហាញ User Name -->
+            <span class="font-bold text-xs">User: <span id="label-user">N/A</span></span>
             <!-- UPDATED: បង្ហាញ Order ID ពី URL -->
             <span class="font-bold text-xs">ID: <span id="label-order-id">ORD-XXXXX</span></span>
         </div>
@@ -161,7 +163,8 @@
                 <div id="label-phone" class="font-bold text-lg text-red-600 mt-0.5">0xx xxx xxx</div>
                 
                 <div class="small-text mt-1 font-bold text-gray-700">ទីតាំង / Location:</div>
-                <div id="label-location" class="data-text text-gray-600">ភ្នំពេញថ្មី, ផ្លូវ 1003</div>
+                <!-- MODIFIED: Made font larger and bold -->
+                <div id="label-location" class="data-text text-gray-800" style="font-size: 11pt; font-weight: 700; line-height: 1.2;">ភ្នំពេញថ្មី, ផ្លូវ 1003</div>
                 
                 <!-- NEW: បន្ថែមអាសយដ្ឋានលម្អិត -->
                 <div class="small-text mt-1 font-bold text-gray-700">អាសយដ្ឋាន / Address:</div>
@@ -189,7 +192,7 @@
         
         <!-- FOOTER -->
         <div class="label-footer mt-1 pt-1 border-t-2 border-dashed border-gray-400 text-center">
-             <div class="small-text font-bold text-gray-700">សូមដឹកជញ្ជូនដោយប្រុងប្រយ័ត្ន! </div>
+             <div class="small-text font-bold text-gray-700">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន! </div>
         </div>
 
     </div>
@@ -226,6 +229,9 @@
             // --- UPDATED: ភ្ជាប់ទិន្នន័យទាំងអស់ ---
             document.getElementById('label-name').textContent = data.name || 'N/A';
             document.getElementById('label-phone').textContent = data.phone || 'N/A';
+            
+            // NEW: ភ្ជាប់ User Name
+            document.getElementById('label-user').textContent = data.user || 'N/A';
             
             // បង្ហាញ Order ID ពិត
             document.getElementById('label-order-id').textContent = data.id.replace('ORD-', '') || 'N/A';
@@ -286,3 +292,4 @@
 </script>
 </body>
 </html>
+
