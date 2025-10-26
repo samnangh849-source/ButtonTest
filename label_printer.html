@@ -136,10 +136,20 @@
 
         /* NEW: Style សម្រាប់ QR Code container */
         #qrcode-container {
-            width: 100%;
+            width: auto;
             display: flex;
             justify-content: flex-end; /* តម្រឹម QR ទៅស្តាំ */
-            margin-top: 1mm;
+            align-items: center;
+        }
+        
+        /* MODIFIED: កែសម្រួល Footer ឱ្យប្រើ Flex */
+        .label-footer {
+            margin-top: 0.5mm;
+            padding-top: 0.5mm;
+            border-top: 2px dashed #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
     </style>
@@ -194,7 +204,7 @@
                 
                 <!-- MODIFIED: ដកពណ៌ក្រហមចេញ -->
                 <div class="total-box bg-gray-100 text-gray-900">
-                    តម្លៃសរុប: <span id="label-total" class="text-xl">$0</span>
+                    តម្លៃសរុប: <span id="label-total" class="text-lg">$0</span> <!-- MODIFIED: text-xl -> text-lg -->
                 </div>
                 
                 <!-- MODIFIED: ដក mt-2 ចេញ -->
@@ -205,17 +215,18 @@
                 <div class="small-text font-bold text-gray-700">ដឹកជញ្ជូនដោយ:</div>
                 <div id="label-shipping" class="data-text">N/A</div>
 
-                <!-- NEW: QR Code Placeholder -->
-                <div id="qrcode-container">
-                    <!-- QR Code នឹងបង្កើតនៅទីនេះដោយ JavaScript -->
-                </div>
+                <!-- QR Code container removed from here -->
             </div>
         </div>
         
         <!-- FOOTER -->
-        <!-- MODIFIED: កាត់បន្ថយ margin/padding -->
-        <div class="label-footer mt-0.5 pt-0.5 border-t-2 border-dashed border-gray-400 text-center">
+        <!-- MODIFIED: កែសម្រួល Footer ឱ្យប្រើ Flex និងដាក់ QR Code នៅទីនេះ -->
+        <div class="label-footer">
              <div class="small-text font-bold text-gray-700">សូមដឹកជញ្ជូនដោយប្រុងប្រយ័ត្ន! </div>
+             <!-- NEW: QR Code Placeholder moved here -->
+             <div id="qrcode-container">
+                 <!-- QR Code នឹងបង្កើតនៅទីនេះដោយ JavaScript -->
+             </div>
         </div>
 
     </div>
@@ -294,8 +305,8 @@
                 const fullUrl = window.location.href; // យក URL បច្ចុប្បន្ន
                 new QRCode(document.getElementById("qrcode-container"), {
                     text: fullUrl,
-                    width: 60, // ប្រហែល 16mm
-                    height: 60,
+                    width: 38, // MODIFIED: កាត់បន្ថយទំហំ (ប្រហែល 10mm)
+                    height: 38,
                     colorDark : "#000000",
                     colorLight : "#ffffff",
                     correctLevel : QRCode.CorrectLevel.L // Low correction សម្រាប់កូដតូច
