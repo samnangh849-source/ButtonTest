@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Label Printer (78mm x 50mm)</title>
+    <title>Label Printer (78x50mm)</title>
     <!-- Tailwind CSS សម្រាប់ភាពងាយស្រួលក្នុងការរចនា UI មើលទៅស្អាតនៅលើទូរស័ព្ទ -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- NEW: បន្ថែម QR Code Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         /* កំណត់ទម្រង់បោះពុម្ពសម្រាប់ទំហំ 78mm x 50mm */
         @page {
@@ -96,6 +98,7 @@
             font-size: 12pt; /* MODIFIED: កាត់បន្ថយពី 14pt */
             font-weight: 700;
             word-wrap: break-word; /* កុំអោយឈ្មោះវែងហៀរ */
+            color: #000;
         }
         
         .small-text {
@@ -111,7 +114,8 @@
         }
 
         .total-box {
-            background-color: #f3f4f6;
+            background-color: #f3f4f6; /* MODIFIED: ប្រើពណ៌ប្រផេះស្រាល */
+            color: #000; /* MODIFIED: ប្រើពណ៌ខ្មៅ */
             padding: 1mm 1.5mm;
             border-radius: 0.125rem;
             margin-top: 1mm;
@@ -122,12 +126,20 @@
         
         /* Style សម្រាប់ស្ថានភាពបង់ប្រាក់ */
         #label-payment.paid {
-            color: #16a34a; /* ពណ៌បៃតងសម្រាប់ Paid */
+            color: #000; /* MODIFIED: ដាក់ពណ៌ខ្មៅ */
             font-weight: 700;
         }
         #label-payment.unpaid {
-            color: #dc2626; /* ពណ៌ក្រហមសម្រាប់ Unpaid/COD */
+            color: #000; /* MODIFIED: ដាក់ពណ៌ខ្មៅ */
             font-weight: 700;
+        }
+
+        /* NEW: Style សម្រាប់ QR Code container */
+        #qrcode-container {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end; /* តម្រឹម QR ទៅស្តាំ */
+            margin-top: 1mm;
         }
         
     </style>
@@ -161,8 +173,8 @@
             <div class="info-block left">
                 <div class="small-text font-bold text-gray-700">អ្នកទទួល / Recipient:</div>
                 <div id="label-name" class="big-text text-gray-800">ឈ្មោះអតិថិជន</div>
-                <!-- MODIFIED: កាត់បន្ថយទំហំ និង margin -->
-                <div id="label-phone" class="font-bold text-base text-red-600">0xx xxx xxx</div>
+                <!-- MODIFIED: ដកពណ៌ក្រហមចេញ -->
+                <div id="label-phone" class="font-bold text-base text-gray-900">0xx xxx xxx</div>
                 
                 <!-- MODIFIED: ដក mt-1 ចេញ -->
                 <div class="small-text font-bold text-gray-700">ទីតាំង / Location:</div>
@@ -180,7 +192,8 @@
                 <div class="small-text mb-0.5 font-bold text-gray-700">កាលបរិច្ឆេទ:</div>
                 <div id="label-date" class="data-text text-gray-600">DD/MM/YYYY</div>
                 
-                <div class="total-box bg-red-100 text-red-800">
+                <!-- MODIFIED: ដកពណ៌ក្រហមចេញ -->
+                <div class="total-box bg-gray-100 text-gray-900">
                     តម្លៃសរុប: <span id="label-total" class="text-xl">$0</span>
                 </div>
                 
@@ -191,6 +204,11 @@
                 <!-- MODIFIED: ដក mt-2 ចេញ -->
                 <div class="small-text font-bold text-gray-700">ដឹកជញ្ជូនដោយ:</div>
                 <div id="label-shipping" class="data-text">N/A</div>
+
+                <!-- NEW: QR Code Placeholder -->
+                <div id="qrcode-container">
+                    <!-- QR Code នឹងបង្កើតនៅទីនេះដោយ JavaScript -->
+                </div>
             </div>
         </div>
         
@@ -256,10 +274,11 @@
             const paymentEl = document.getElementById('label-payment');
             const paymentStatus = data.payment || 'N/A';
             paymentEl.textContent = paymentStatus;
+            // MODIFIED: ប្រើ Class សម្រាប់តែសម្គាល់ មិនមែនសម្រាប់ពណ៌
             if (paymentStatus.toLowerCase().includes('paid')) {
-                paymentEl.classList.add('paid'); // ពណ៌បៃតង
+                paymentEl.classList.add('paid');
             } else {
-                paymentEl.classList.add('unpaid'); // ពណ៌ក្រហម
+                paymentEl.classList.add('unpaid');
             }
 
             // បង្ហាញវិធីដឹកជញ្ជូន
@@ -269,6 +288,24 @@
             const today = new Date();
             const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
             document.getElementById('label-date').textContent = dateStr;
+
+            // --- NEW: បង្កើត QR Code ---
+            try {
+                const fullUrl = window.location.href; // យក URL បច្ចុប្បន្ន
+                new QRCode(document.getElementById("qrcode-container"), {
+                    text: fullUrl,
+                    width: 60, // ប្រហែល 16mm
+                    height: 60,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.L // Low correction សម្រាប់កូដតូច
+                });
+            } catch (e) {
+                console.error("Failed to generate QR Code", e);
+                document.getElementById('qrcode-container').textContent = "QR Error";
+            }
+            // --- ចប់ផ្នែក QR Code ---
+
 
             loading.classList.add('hidden');
             
