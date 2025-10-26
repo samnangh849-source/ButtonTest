@@ -1,9 +1,9 @@
 <!-- នេះជាឯកសារ HTML តែមួយដែលដំណើរការជា Label Printing Service។ -->
-<!-- វានឹងអានទិន្នន័យពី URL, បង្ហាញក្នុងទំហំ 78mm x 50mm, និងត្រៀមសម្រាប់បោះពម្ព។ -->
+<!-- វានឹងអានទិន្នន័យពី URL, បង្ហាញក្នុងទំហំ 78mm x 50mm, និងត្រៀមសម្រាប់បោះពុម្ព។ -->
 <html lang="km">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Label Printer (78mm x 50mm)</title>
     <!-- Tailwind CSS សម្រាប់ភាពងាយស្រួលក្នុងការរចនា UI មើលទៅស្អាតនៅលើទូរស័ព្ទ -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -44,23 +44,23 @@
             width: 78mm; /* ទំហំ Label ពិតប្រាកដ */
             height: 50mm;
             background-color: white;
-            padding: 3mm; /* កាត់បន្ថយ Padding បន្តិច */
+            padding: 2mm; /* MODIFIED: កាត់បន្ថយ Padding */
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
             border-radius: 0.25rem;
             margin: 20px auto;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            /* MODIFIED: ដក justify-content ចេញ ដើម្បីឱ្យ flow ធម្មតា */
             font-size: 8pt; /* កំណត់ Font size មូលដ្ឋាន */
-            line-height: 1.25; /* កែសម្រួល Line height */
+            line-height: 1.2; /* MODIFIED: កាត់បន្ថយ Line height */
             overflow: hidden;
             border: 1px dashed #ccc; /* បង្ហាញបន្ទាត់ព្រំដែននៅលើអេក្រង់ */
         }
 
         .label-header {
             border-bottom: 1px dashed #000;
-            padding-bottom: 1mm;
-            margin-bottom: 1mm;
+            padding-bottom: 0.5mm; /* MODIFIED: កាត់បន្ថយ */
+            margin-bottom: 0.5mm; /* MODIFIED: កាត់បន្ថយ */
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -72,6 +72,7 @@
             align-items: flex-start;
             flex-grow: 1; /* អោយវាយកកន្លែងដែលនៅសល់ */
             gap: 2mm; /* គម្លាតរវាងចំហៀងឆ្វេងនិងស្តាំ */
+            min-height: 0; /* ជួសជុលបញ្ហា flexbox overflow */
         }
         
         .info-block {
@@ -92,7 +93,7 @@
         }
 
         .big-text {
-            font-size: 14pt;
+            font-size: 12pt; /* MODIFIED: កាត់បន្ថយពី 14pt */
             font-weight: 700;
             word-wrap: break-word; /* កុំអោយឈ្មោះវែងហៀរ */
         }
@@ -160,15 +161,18 @@
             <div class="info-block left">
                 <div class="small-text font-bold text-gray-700">អ្នកទទួល / Recipient:</div>
                 <div id="label-name" class="big-text text-gray-800">ឈ្មោះអតិថិជន</div>
-                <div id="label-phone" class="font-bold text-lg text-red-600 mt-0.5">0xx xxx xxx</div>
+                <!-- MODIFIED: កាត់បន្ថយទំហំ និង margin -->
+                <div id="label-phone" class="font-bold text-base text-red-600">0xx xxx xxx</div>
                 
-                <div class="small-text mt-1 font-bold text-gray-700">ទីតាំង / Location:</div>
+                <!-- MODIFIED: ដក mt-1 ចេញ -->
+                <div class="small-text font-bold text-gray-700">ទីតាំង / Location:</div>
                 <!-- MODIFIED: Made font larger and bold -->
                 <div id="label-location" class="data-text text-gray-800" style="font-size: 11pt; font-weight: 700; line-height: 1.2;">ភ្នំពេញថ្មី, ផ្លូវ 1003</div>
                 
-                <!-- NEW: បន្ថែមអាសយដ្ឋានលម្អិត -->
-                <div class="small-text mt-1 font-bold text-gray-700">អាសយដ្ឋាន / Address:</div>
-                <div id="label-address" class="data-text text-gray-600" style="font-size: 8pt; line-height: 1.2;">(គ្មាន)</div>
+                <!-- MODIFIED: ដក mt-1 ចេញ -->
+                <div class="small-text font-bold text-gray-700">អាសយដ្ឋាន / Address:</div>
+                <!-- MODIFIED: កាត់បន្ថយទំហំ និង line-height -->
+                <div id="label-address" class="data-text text-gray-600" style="font-size: 7pt; line-height: 1.1;">(គ្មាន)</div>
             </div>
 
             <!-- Right Block: Total & Tracking -->
@@ -180,19 +184,20 @@
                     តម្លៃសរុប: <span id="label-total" class="text-xl">$0</span>
                 </div>
                 
-                <!-- NEW: ស្ថានភាពបង់ប្រាក់ -->
-                <div class="small-text mt-2 font-bold text-gray-700">ស្ថានភាពបង់ប្រាក់:</div>
+                <!-- MODIFIED: ដក mt-2 ចេញ -->
+                <div class="small-text font-bold text-gray-700">ស្ថានភាពបង់ប្រាក់:</div>
                 <div id="label-payment" class="data-text">N/A</div>
                 
-                <!-- NEW: វិធីដឹកជញ្ជូន -->
-                <div class="small-text mt-2 font-bold text-gray-700">ដឹកជញ្ជូនដោយ:</div>
+                <!-- MODIFIED: ដក mt-2 ចេញ -->
+                <div class="small-text font-bold text-gray-700">ដឹកជញ្ជូនដោយ:</div>
                 <div id="label-shipping" class="data-text">N/A</div>
             </div>
         </div>
         
         <!-- FOOTER -->
-        <div class="label-footer mt-1 pt-1 border-t-2 border-dashed border-gray-400 text-center">
-             <div class="small-text font-bold text-gray-700">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន! </div>
+        <!-- MODIFIED: កាត់បន្ថយ margin/padding -->
+        <div class="label-footer mt-0.5 pt-0.5 border-t-2 border-dashed border-gray-400 text-center">
+             <div class="small-text font-bold text-gray-700">សូមដឹកជញ្ជូនដោយប្រុងប្រយ័ត្ន! </div>
         </div>
 
     </div>
