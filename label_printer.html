@@ -1,0 +1,222 @@
+<!-- នេះជាឯកសារ HTML តែមួយដែលដំណើរការជា Label Printing Service។ -->
+<!-- វានឹងអានទិន្នន័យពី URL, បង្ហាញក្នុងទំហំ 78mm x 50mm, និងត្រៀមសម្រាប់បោះពុម្ព។ -->
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Label Printer (78mm x 50mm)</title>
+    <!-- Tailwind CSS សម្រាប់ភាពងាយស្រួលក្នុងការរចនា UI មើលទៅស្អាតនៅលើទូរស័ព្ទ -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* កំណត់ទម្រង់បោះពុម្ពសម្រាប់ទំហំ 78mm x 50mm */
+        @page {
+            size: 78mm 50mm;
+            margin: 0;
+        }
+
+        /* លាក់ប៊ូតុង និង UI ផ្សេងៗនៅពេលបោះពុម្ព */
+        @media print {
+            .no-print {
+                display: none;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            #label-container {
+                width: 78mm;
+                height: 50mm;
+                margin: 0;
+                box-shadow: none; /* លាក់ Shadow ពេល Print */
+                transform: scale(1); /* ធានាថាមិនមានការបង្រួម/ពង្រីក */
+            }
+        }
+
+        /* សម្រាប់មើលនៅលើអេក្រង់ (Mobile Responsive) */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            padding: 1rem;
+        }
+
+        #label-container {
+            width: 78mm; /* ទំហំ Label ពិតប្រាកដ */
+            height: 50mm;
+            background-color: white;
+            padding: 4mm;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+            border-radius: 0.25rem;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 8pt; /* កាត់បន្ថយ Font size សម្រាប់ទំហំតូច */
+            line-height: 1.2;
+            overflow: hidden;
+            border: 1px dashed #ccc; /* បង្ហាញបន្ទាត់ព្រំដែននៅលើអេក្រង់ */
+        }
+
+        .label-header {
+            border-bottom: 1px dashed #000;
+            padding-bottom: 1mm;
+            margin-bottom: 1mm;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .info-block {
+            flex: 1;
+        }
+
+        .info-block.right {
+            text-align: right;
+            border-left: 1px dashed #ccc;
+            padding-left: 2mm;
+        }
+
+        .big-text {
+            font-size: 14pt;
+            font-weight: 700;
+        }
+        
+        .small-text {
+            font-size: 7pt;
+            color: #4b5563;
+        }
+
+        .total-box {
+            background-color: #f3f4f6;
+            padding: 1mm 2mm;
+            border-radius: 0.125rem;
+            margin-top: 1mm;
+            font-weight: 700;
+            font-size: 10pt;
+            text-align: center;
+        }
+        
+    </style>
+</head>
+<body class="p-4">
+
+    <!-- Print Control UI -->
+    <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6">
+        <h1 class="text-xl font-bold text-gray-800 mb-2">ទម្រង់ព្រីន Label (78x50mm)</h1>
+        <p class="text-sm text-gray-600 mb-4">សូមចុចប៊ូតុង "Print Label" ហើយកំណត់ទំហំក្រដាស (Paper Size) ទៅជា 78mm x 50mm មុននឹងបោះពុម្ព។</p>
+        <button id="printButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
+            ✅ Print Label នេះ
+        </button>
+        <div id="loading" class="hidden text-center mt-3 text-sm text-gray-500">កំពុងទាញយកទិន្នន័យ...</div>
+    </div>
+
+    <!-- Label Container (The 78x50mm area) -->
+    <div id="label-container">
+        <!-- HEADER -->
+        <div class="label-header text-center">
+            <span class="font-bold text-xs">Gadme Store</span>
+            <div class="small-text">☎️ 096 999 9999</div>
+        </div>
+        
+        <!-- MAIN INFO -->
+        <div class="info-row flex-grow">
+            <!-- Left Block: Recipient Info -->
+            <div class="info-block">
+                <div class="small-text mb-0.5 font-bold text-gray-700">អ្នកទទួល / Recipient:</div>
+                <div id="label-name" class="big-text text-gray-800">ឈ្មោះអតិថិជន</div>
+                <div id="label-phone" class="font-bold text-lg text-red-600 mt-0.5">0xx xxx xxx</div>
+                <div class="small-text mt-1 font-bold text-gray-700">ទីតាំង / Location:</div>
+                <div id="label-location" class="font-medium text-sm text-gray-600">ភ្នំពេញថ្មី, ផ្លូវ 1003</div>
+            </div>
+
+            <!-- Right Block: Total & Tracking -->
+            <div class="info-block right">
+                <div class="small-text mb-0.5 font-bold text-gray-700">កាលបរិច្ឆេទ:</div>
+                <div id="label-date" class="font-medium text-sm text-gray-600">DD/MM/YYYY</div>
+                
+                <div class="small-text mt-2 font-bold text-gray-700">លេខកូដដឹកជញ្ជូន:</div>
+                <div class="font-bold text-base text-blue-600">#GDME<span id="label-order-id">12345</span></div>
+                
+                <div class="total-box bg-red-100 text-red-800">
+                    តម្លៃសរុប: <span id="label-total" class="text-xl">$28</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FOOTER -->
+        <div class="label-footer mt-1 pt-1 border-t-2 border-dashed border-gray-400 text-center">
+             <div class="small-text font-bold text-gray-700">សូមដឹកជញ្ជូនដោយប្រុងប្រយ័ត្ន! </div>
+        </div>
+
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const loading = document.getElementById('loading');
+        const printButton = document.getElementById('printButton');
+        const labelContainer = document.getElementById('label-container');
+        
+        loading.classList.remove('hidden');
+
+        // Function to get query parameters from URL
+        function getQueryParams() {
+            const params = {};
+            // Get the query string (excluding the '?')
+            const queryString = window.location.search.substring(1);
+            if (!queryString) return params;
+
+            // Split into key=value pairs
+            const pairs = queryString.split('&');
+
+            // Iterate over pairs and populate the params object
+            for (let i = 0; i < pairs.length; i++) {
+                let pair = pairs[i].split('=');
+                // Decode URL-encoded components (e.g., spaces, Khmer characters)
+                if (pair.length > 1) {
+                     params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1].replace(/\+/g, ' '));
+                }
+            }
+            return params;
+        }
+
+        // Get data from URL
+        const data = getQueryParams();
+
+        // Check if data is present and populate the label
+        if (Object.keys(data).length > 0) {
+            document.getElementById('label-name').textContent = data.name || 'N/A';
+            document.getElementById('label-phone').textContent = data.phone || 'N/A';
+            document.getElementById('label-location').textContent = data.location || 'N/A';
+            document.getElementById('label-total').textContent = `$${data.total}` || 'N/A';
+            
+            // Generate a simple Order ID and Date
+            document.getElementById('label-order-id').textContent = Math.floor(Math.random() * 100000);
+            const today = new Date();
+            const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+            document.getElementById('label-date').textContent = dateStr;
+
+            loading.classList.add('hidden');
+            
+            // Set up Print Button Listener
+            printButton.addEventListener('click', () => {
+                // Trigger the browser's print dialog
+                window.print();
+            });
+
+        } else {
+            // Handle case where no data is passed (e.g., user opened the page directly)
+            labelContainer.innerHTML = `
+                <div class="text-center text-red-500 p-4">
+                    <p class="text-lg">❌ គ្មានទិន្នន័យសម្រាប់ព្រីន</p>
+                    <p class="text-sm mt-2">សូមប្រាកដថាអ្នកបានចុចប៊ូតុង "ចុចដើម្បីព្រីន Label" ពី Telegram Bot។</p>
+                </div>
+            `;
+            loading.classList.add('hidden');
+            printButton.classList.add('hidden'); // លាក់ប៊ូតុងព្រីន
+        }
+    });
+</script>
+</body>
+</html>
