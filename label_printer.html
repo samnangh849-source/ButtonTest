@@ -66,6 +66,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            /* MODIFIED: កំណត់ទំហំអក្សរតូចសម្រាប់ Header ទាំងមូល */
+            font-size: 7pt;
+            font-weight: 700;
+            color: #4b5563;
         }
         
         .info-row {
@@ -169,12 +173,11 @@
     <!-- Label Container (The 78x50mm area) -->
     <div id="label-container">
         <!-- HEADER -->
+        <!-- MODIFIED: កែទម្រង់ Header និងប្រើ Style ពី CSS -->
         <div class="label-header">
-            <span class="font-bold text-xs">Gadme Store</span>
-            <!-- NEW: បង្ហាញ User Name -->
-            <span class="font-bold text-xs">User: <span id="label-user">N/A</span></span>
-            <!-- UPDATED: បង្ហាញ Order ID ពី URL -->
-            <span class="font-bold text-xs">ID: <span id="label-order-id">ORD-XXXXX</span></span>
+            <span>Page: <span id="label-page" class="text-black">N/A</span></span>
+            <span>User: <span id="label-user" class="text-black">N/A</span></span>
+            <span>ID: <span id="label-order-id" class="text-black">ORD-XXXXX</span></span>
         </div>
         
         <!-- MAIN INFO -->
@@ -204,7 +207,7 @@
                 
                 <!-- MODIFIED: ដកពណ៌ក្រហមចេញ -->
                 <div class="total-box bg-gray-100 text-gray-900">
-                    តម្លៃសរុប: <span id="label-total" class="text-lg">$0</span> <!-- MODIFIED: text-xl -> text-lg -->
+                    តម្លៃសរុប: <span id="label-total" class="text-base font-bold">$0</span> <!-- MODIFIED: text-lg -> text-base -->
                 </div>
                 
                 <!-- MODIFIED: ដក mt-2 ចេញ -->
@@ -263,6 +266,9 @@
             // --- UPDATED: ភ្ជាប់ទិន្នន័យទាំងអស់ ---
             document.getElementById('label-name').textContent = data.name || 'N/A';
             document.getElementById('label-phone').textContent = data.phone || 'N/A';
+            
+            // NEW: ភ្ជាប់ Page Name
+            document.getElementById('label-page').textContent = data.page || 'N/A';
             
             // NEW: ភ្ជាប់ User Name
             document.getElementById('label-user').textContent = data.user || 'N/A';
