@@ -220,12 +220,14 @@
 
 
         <div class="flex flex-col gap-2">
+            <!-- *** CHANGED (Request 1) *** -->
             <button id="guideButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                ℹ️ ព័ត៌មានបោះពU+E00 (Print Guide)
+                ព័ត៌មានបោះពុម្ព(ការកំណត់)
             </button>
 
+            <!-- *** CHANGED (Request 3) *** -->
             <button id="printButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
-                ✅ Print Label នេះ
+                Print Label
             </button>
         </div>
     </div>
@@ -280,7 +282,8 @@
             </div>
         </div>
 
-        <div class="label-footer">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន!</div>
+        <!-- *** CHANGED (Request 2) *** -->
+        <div class="label-footer">សូមដឹកជញ្ជូនដោយប្រុងប្រយ័ត្ន!</div>
     </div>
 
     <!-- Audio Players -->
@@ -302,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioGuide = document.getElementById('audioGuide');
     const audioSuccess = document.getElementById('audioSuccess');
 
-    // *** NEW: Audio Management Logic ***
+    // *** Audio Management Logic ***
     let currentAudio = null;      // សម្លេងដែលកំពុងលឺ
     let interruptedAudio = null;  // សម្លេងដែលត្រូវបានផ្អាក
 
@@ -365,18 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Function សម្រាប់បញ្ឈប់សម្លេងទាំងអស់ (ពេលបិទ Modal)
-    function stopAllAudio() {
-        if (currentAudio) {
-            currentAudio.pause();
-            currentAudio = null;
-        }
-        if (interruptedAudio) {
-            interruptedAudio.pause();
-            interruptedAudio = null;
-        }
-    }
-    // *** END: Audio Management Logic ***
-
+    // *** REMOVED `stopAllAudio()` as it's replaced by the new logic below ***
 
     if (params.id) {
         document.getElementById('label-page').textContent = params.page || 'N/A';
@@ -422,8 +414,16 @@ document.addEventListener('DOMContentLoaded', () => {
         playAudio(audioGuide);
         guideModal.style.display = 'flex';
     });
+    
+    // *** CHANGED (Request 4) ***
     closeGuide.addEventListener('click', () => {
-        stopAllAudio(); // *** NEW: ប្រើ Function ថ្មីដើម្បីបញ្ឈប់សម្លេងទាំងអស់
+        // 1. ពិនិត្យមើលថា Guide កំពុងលឺមែនទេ
+        if (currentAudio && currentAudio === audioGuide) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            // 2. ហៅ onAudioEnded() ដើម្បីពិនិត្យមើល និងបន្តសម្លេងដែលបានផ្អាក (Welcome)
+            onAudioEnded(); 
+        }
         guideModal.style.display = 'none';
     });
 
