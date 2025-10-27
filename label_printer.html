@@ -161,11 +161,16 @@
     <!-- UI មុនព្រីន -->
     <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6 text-center">
         <h1 class="text-xl font-bold text-gray-800 mb-2">ទម្រង់ព្រីន Label</h1>
-        <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពម្ព។ ទំហំ (78mm x 50mm)</p>
+        <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពុម្ព។ ទំហំ (78mm x 50mm)</p>
 
         <div class="flex flex-col gap-2">
             <button id="guideButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
                 ℹ️ ព័ត៌មានបោះពុម្ព (Print Guide)
+            </button>
+            
+            <!-- NEW: ប៊ូតុងសម្លេង -->
+            <button id="speakButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                🔈 ស្តាប់ការណែនាំ
             </button>
 
             <button id="printButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
@@ -225,7 +230,7 @@
             </div>
         </div>
 
-        <div class="label-footer">សូមដឹកជញ្ជូនដោយប្រុងប្រយ័ត្ន!</div>
+        <div class="label-footer">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន!</div>
     </div>
 
 <script>
@@ -266,6 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const guideBtn = document.getElementById('guideButton');
     const guideModal = document.getElementById('print-guide-modal');
     const closeGuide = document.getElementById('closeGuide');
+    const speakButton = document.getElementById('speakButton'); // NEW
 
     guideBtn.addEventListener('click', () => guideModal.style.display = 'flex');
     closeGuide.addEventListener('click', () => guideModal.style.display = 'none');
@@ -277,8 +283,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // NEW: ធ្វើបច្ចុប្បន្នភាព JavaScript logic ដើម្បីដោះស្រាយ decodeURIComponent លើទិន្នន័យទាំងអស់
-    // (បានបញ្ចូលទៅក្នុង if (params.id) block ខាងលើរួចរាល់)
+    // --- NEW: មុខងារសម្លេង (Speech Synthesis) ---
+    function speakInstructions() {
+        // ពិនិត្យមើលថា browser គាំទ្រ TTS
+        if ('speechSynthesis' in window) {
+            // បញ្ឈប់សម្លេងចាស់ (ប្រសិនបើមាន)
+            window.speechSynthesis.cancel();
+            
+            // អត្ថបទដែលត្រូវអាន (ផ្អែកលើ Print Guide)
+            const textToSpeak = "សូមស្វាគមន៍។ សូមធ្វើការកំណត់ Printer ឱ្យបានត្រឹមត្រូវ។ ជ្រើសទំហំក្រដាស Custom 78mm គុណ 50mm។ កំណត់ Scale ទៅ 100% និង Margins ទៅ None។ សូមអរគុណ។";
+            
+            // បង្កើត object សម្លេង
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            
+            // កំណត់ភាសាជាខ្មែរ
+            utterance.lang = 'km-KH';
+            
+            // កំណត់ល្បឿន និងកម្រិតសម្លេង
+            utterance.pitch = 1; // 1 = default
+            utterance.rate = 0.9; // 0.9 = យឺតជាងមុនបន្តិច
+            
+            // ចាប់ផ្តើមអាន
+            window.speechSynthesis.speak(utterance);
+        } else {
+            // ប្រសិនបើ browser មិនគាំទ្រ
+            alert('សុំអភ័យទោស, browser របស់អ្នកមិនគាំទ្រមុខងារសម្លេងនេះទេ។');
+        }
+    }
+    
+    // ភ្ជាប់ប៊ូតុងសម្លេងទៅ Function
+    speakButton.addEventListener('click', speakInstructions);
+
 });
 </script>
 
