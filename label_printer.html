@@ -32,7 +32,8 @@
             height: var(--page-height);
             background-color: white;
             margin: 0 auto;
-            padding: 1mm;
+            /* UPDATED: Changed padding to 1mm (top/bottom) and 3mm (left/right) */
+            padding: 1mm 3mm;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -171,8 +172,7 @@
         }
 
         /* NEW: Helper class for custom inputs */
-        #custom-size-inputs.hidden,
-        #voice-alert.hidden {
+        #custom-size-inputs.hidden {
             display: none;
         }
     </style>
@@ -189,30 +189,14 @@
                 ℹ️ ព័ត៌មានបោះពុម្ព (Print Guide)
             </button>
             
-            <button id="speakButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                🔈 ស្តាប់ការណែនាំ (Print Guide)
-            </button>
+            <!-- REMOVED: ប៊ូតុងសម្លេង (Speak Button) ត្រូវបានដកចេញ -->
 
             <button id="printButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
                 ✅ Print Label នេះ
             </button>
         </div>
 
-        <!-- UPDATED: Voice Pack Alert Box with Links -->
-        <div id="voice-alert" class="hidden p-3 mt-2 rounded-md bg-yellow-100 border border-yellow-300 text-left">
-            <p class="text-sm font-semibold text-yellow-800">⚠️ រកមិនឃើញសម្លេងភាសាខ្មែរ</p>
-            <p class="text-xs text-yellow-700 mt-1">
-                មុខងារសម្លេងត្រូវការ "Khmer Voice Pack"។
-                <br>
-                - **Windows:** ចូលទៅកាន់ Settings > Time & Language > Language > Add a language > Khmer (ហើយដំឡើង Speech Pack)។
-                <br>
-                - **Android:** ចូលទៅកាន់ Settings > Accessibility > Text-to-speech > Install voice data។
-                <br>
-                <a href="https://support.microsoft.com/en-us/office/download-a-text-to-speech-language-in-windows-f5c1330c-a7a2-4d2c-87d4-7517c5d0033c" target="_blank" class="text-blue-600 font-medium underline">
-                    មើលមគ្គុទ្ទេសក៍ Microsoft នៅទីនេះ
-                </a>
-            </p>
-        </div>
+        <!-- REMOVED: Voice Pack Alert Box ត្រូវបានដកចេញ -->
 
 
         <!-- NEW: ជម្រើសទំហំ Label -->
@@ -294,54 +278,19 @@
         <div class="label-footer">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន!</div>
     </div>
 
+    <!-- UPDATED: Audio elements. Using relative paths (local folder) -->
+    <!-- សូមប្រាកដថាអ្នកបានដាក់ឈ្មោះ File MP3 របស់អ្នក ឱ្យត្រូវនឹងឈ្មោះខាងក្រោមនេះ -->
+    <audio id="audioWelcome" src="welcome.mp3" preload="auto"></audio>
+    <audio id="audioGuide" src="guide.mp3" preload="auto"></audio>
+    <audio id="audioSuccess" src="success.mp3" preload="auto"></audio>
+    <!-- End Audio elements -->
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // ប្រើ URLSearchParams ថ្មីដែលងាយស្រួលអានជាង
     const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
     
-    // --- UPDATED: មុខងារសម្លេង (Speech Synthesis) ដែលអាចប្រើឡើងវិញបាន ---
-    function speakText(textToSpeak, lang = 'km-KH', rate = 0.9) {
-        if (!('speechSynthesis' in window)) {
-            console.error("Browser មិនគាំទ្រ Speech Synthesis");
-            return false; // មិនដំណើរការ
-        }
-        
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(textToSpeak);
-        
-        // --- NEW LOGIC: ស្វែងរកសម្លេងខ្មែរពិតប្រាកដ ---
-        const voices = window.speechSynthesis.getVoices();
-        const khmerVoice = voices.find(voice => voice.lang === 'km-KH');
-        
-        // NEW: ស្វែងរក Alert Box
-        const voiceAlert = document.getElementById('voice-alert');
-        
-        if (khmerVoice) {
-            // ប្រសិនបើរកឃើញ, ប្រើសម្លេងនោះ (នេះគឺត្រឹមត្រូវបំផុត)
-            utterance.voice = khmerVoice;
-            utterance.pitch = 1;
-            utterance.rate = rate;
-            
-            // លាក់ Alert ប្រសិនបើវាត្រូវបានបង្ហាញពីមុន
-            voiceAlert.classList.add('hidden');
-            
-            window.speechSynthesis.speak(utterance);
-            return true; // ដំណើរការ
-        } else {
-            // បើមិនឃើញ, បង្ហាញ Alert Box
-            voiceAlert.classList.remove('hidden');
-            console.warn("មិនអាចរកសម្លេង 'km-KH' បានទេ។ Browser អាចនឹងប្រើសម្លេង Default។");
-            return false; // មិនដំណើរការ
-        }
-        // --- ចប់ផ្នែកកែសម្រួល ---
-    }
-    
-    // --- NEW: ព្យាយាមផ្ទុក Voices ទុកជាមុន ---
-    if ('speechSynthesis' in window && window.speechSynthesis.onvoiceschanged !== undefined) {
-         window.speechSynthesis.onvoiceschanged = () => {
-            window.speechSynthesis.getVoices();
-         };
-    }
+    // --- REMOVED: មុខងារសម្លេង (Speech Synthesis) ត្រូវបានដកចេញ ---
     
     // --- NEW: Custom Size UI Elements ---
     const sizeStandard = document.getElementById('sizeStandard');
@@ -349,6 +298,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const customSizeInputs = document.getElementById('custom-size-inputs');
     const customWidthInput = document.getElementById('customWidth');
     const customHeightInput = document.getElementById('customHeight');
+    
+    // --- NEW: Audio Elements ---
+    const audioWelcome = document.getElementById('audioWelcome');
+    const audioGuide = document.getElementById('audioGuide');
+    const audioSuccess = document.getElementById('audioSuccess');
     
     // Pixel per MM (approx @ 96 DPI)
     const PX_PER_MM = 3.7795275591; 
@@ -426,15 +380,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
         document.getElementById('label-date').textContent = d;
 
-        // --- NEW: ចាក់សម្លេងស្វាគមន៍ដោយស្វ័យប្រវត្តិ ---
-        const welcomeText = "សូមពិនិត្យទិន្នន័យ។ បន្ទាប់មក, ចុចប៊ូតុង ព្រីន ឡែប៊ល ពណ៌ខៀវ ដើម្បីបោះពុម្ព។";
+        // --- UPDATED: ចាក់សម្លេងស្វាគមន៍ដោយស្វ័យប្រវត្តិ (MP3) ---
         try {
             // ប្រើ setTimeout ដើម្បីឱ្យទំព័រមានពេលបន្តិចមុននឹងនិយាយ
             setTimeout(() => {
-                speakText(welcomeText);
+                audioWelcome.play().catch(e => console.warn("មិនអាចចាក់សម្លេងស្វាគមន៍ដោយស្វ័យប្រវត្តិទេ (បញ្ហា Autoplay Policy):", e));
             }, 500); // 500ms delay
         } catch (e) {
-            console.warn("មិនអាចចាក់សម្លេងស្វាគមន៍ដោយស្វ័យប្រវត្តិទេ (បញ្ហា Autoplay Policy):", e);
+            console.warn("Error trying to play welcome audio:", e);
         }
 
     } else {
@@ -442,39 +395,57 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('label-container').style.display = 'none';
         document.getElementById('printButton').disabled = true;
         document.getElementById('printButton').textContent = '❌ គ្មានទិន្នន័យ';
-        document.getElementById('speakButton').disabled = true; // បិទប៊ូតុងសម្លេងដែរ
+        // document.getElementById('speakButton').disabled = true; // No longer exists
     }
 
     // Print button
-    document.getElementById('printButton').addEventListener('click', () => window.print());
+    document.getElementById('printButton').addEventListener('click', () => {
+        // NEW: Play success sound, then print
+        audioSuccess.currentTime = 0; // Rewind to start
+        audioSuccess.play();
+        
+        // Delay print dialog to allow sound to play
+        setTimeout(() => {
+            window.print();
+        }, 300); // 300ms delay
+    });
 
     // Guide modal
     const guideBtn = document.getElementById('guideButton');
     const guideModal = document.getElementById('print-guide-modal');
     const closeGuide = document.getElementById('closeGuide');
-    const speakButton = document.getElementById('speakButton'); // NEW
+    // const speakButton = document.getElementById('speakButton'); // No longer exists
 
-    guideBtn.addEventListener('click', () => guideModal.style.display = 'flex');
-    closeGuide.addEventListener('click', () => guideModal.style.display = 'none');
+    guideBtn.addEventListener('click', () => {
+        // NEW: Play guide sound when modal opens
+        audioGuide.currentTime = 0; // Rewind to start
+        audioGuide.play();
+        guideModal.style.display = 'flex';
+    });
+    
+    closeGuide.addEventListener('click', () => {
+        audioGuide.pause(); // Stop sound if modal is closed
+        audioGuide.currentTime = 0;
+        guideModal.style.display = 'none';
+    });
     
     // NEW: បិទ Modal ពេលចុចក្រៅ Content
     guideModal.addEventListener('click', (e) => {
         if (e.target === guideModal) {
+            audioGuide.pause(); // Stop sound if modal is closed
+            audioGuide.currentTime = 0;
             guideModal.style.display = 'none';
         }
     });
 
     
-    // ភ្ជាប់ប៊ូតុងសម្លេង (Print Guide) ទៅ Function
-    speakButton.addEventListener('click', () => {
-        const guideText = "សូមស្វាគមន៍។ សូមធ្វើការកំណត់ Printer ឱ្យបានត្រឹមត្រូវ។ ជ្រើសទំហំក្រដាស Custom 78mm គុណ 50mm។ កំណត់ Scale ទៅ 100% និង Margins ទៅ None។ សូមអរគុណ។";
-        // UPDATED: មិនចាំបាច់ប្រើ if ទេ ព្រោះ speakText នឹងបង្ហាញ Alert ដោយខ្លួនឯង
-        speakText(guideText);
-    });
+    // REMOVED: speakButton event listener
 
 });
 </script>
 
 </body>
 </html>
+
+
 
