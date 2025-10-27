@@ -1,231 +1,287 @@
 <html lang="km">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Label Printer (78mm x 50mm)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    html, body {
-      box-sizing: border-box;
-      font-family: 'Inter', 'Noto Sans Khmer', sans-serif;
-      color: #000;
-      background-color: #f3f4f6;
-    }
-    *, *::before, *::after { box-sizing: inherit; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Label Printer (78mm x 50mm)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- NEW: Import Kantumruy Pro Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        html, body {
+            box-sizing: border-box;
+            /* NEW: Apply Kantumruy Pro Font and set base color to black */
+            font-family: 'Kantumruy Pro', sans-serif;
+            font-weight: 400;
+            color: #000;
+        }
+        *, *:before, *:after { box-sizing: inherit; }
 
-    /* Label Container */
-    #label-container {
-      width: 295px;  /* 78mm */
-      height: 189px; /* 50mm */
-      background: #fff;
-      padding: 4mm 3mm;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow: hidden;
-      border: 1px solid #000;
-    }
+        #label-container {
+            width: 295px;    /* 78mm */
+            height: 189px;   /* 50mm */
+            background-color: white;
+            margin: 0 auto;
+            padding: 1mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 8pt;
+            line-height: 1.2; /* Adjusted line height for Khmer font */
+            overflow: hidden;
+            border: 1px dashed #ccc;
+        }
 
-    .label-header {
-      display: flex;
-      justify-content: space-between;
-      font-weight: 600;
-      font-size: 8pt;
-      border-bottom: 1px dashed #000;
-      padding-bottom: 2px;
-    }
+        .label-header {
+            border-bottom: 1px dashed #000;
+            display: flex;
+            justify-content: space-between;
+            font-size: 7pt;
+            font-weight: 500; /* Medium weight for header */
+            padding-bottom: 1mm;
+        }
 
-    .info-section {
-      display: flex;
-      justify-content: space-between;
-      flex-grow: 1;
-      padding-top: 2px;
-    }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            flex-grow: 1;
+            gap: 1mm;
+            padding-top: 0.5mm; /* Add a little space */
+        }
 
-    .info-block {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
+        .info-block { flex: 1; }
+        .info-block.right {
+            text-align: right;
+            border-left: 1px dashed #ccc;
+            padding-left: 1mm;
+            width: 40%;
+        }
+        .info-block.left { width: 60%; }
 
-    .left { width: 60%; }
-    .right { width: 38%; text-align: right; }
+        /* NEW: Set labels to regular weight and black */
+        .small-text { 
+            font-size: 7pt; 
+            color: #000; 
+            font-weight: 400; /* Regular weight */
+            margin-bottom: 0.2mm;
+        }
+        
+        /* NEW: Ensure data text is bold */
+        .data-text { 
+            font-size: 9pt; 
+            font-weight: 700; /* Bold */
+            word-wrap: break-word; /* Prevent long text overflow */
+        }
+        
+        /* NEW: Ensure name is bold */
+        .big-text { 
+            font-size: 10pt; 
+            font-weight: 700; /* Bold */
+            word-wrap: break-word;
+        }
+        
+        /* NEW: Ensure phone is bold */
+        #label-phone {
+            font-size: 10pt;
+            font-weight: 700; /* Bold */
+            margin-bottom: 0.5mm;
+        }
 
-    .label-title {
-      font-size: 7pt;
-      font-weight: 600;
-      margin-top: 2px;
-    }
+        .total-box {
+            background-color: #f3f4f6;
+            color: #000;
+            padding: 0.5mm 1mm;
+            border-radius: 0.125rem;
+            font-weight: 700; /* Bold */
+            font-size: 10pt;
+            margin-top: 0.5mm;
+            border: 1px solid #eee; /* Add slight border */
+        }
 
-    .label-value {
-      font-size: 9pt;
-      font-weight: 500;
-      margin-bottom: 2px;
-    }
+        .label-footer {
+            border-top: 1px dashed #000;
+            text-align: center;
+            font-size: 7pt;
+            font-weight: 500; /* Medium weight */
+            padding-top: 1mm;
+        }
 
-    .total-box {
-      border: 1px solid #000;
-      font-weight: 700;
-      font-size: 10pt;
-      padding: 2px 3px;
-      margin-top: 2px;
-      text-align: center;
-    }
+        @media print {
+            html, body {
+                width: 78mm;
+                height: 50mm;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: none !important;
+                color: #000; /* Ensure black color for printing */
+            }
 
-    .label-footer {
-      border-top: 1px dashed #000;
-      text-align: center;
-      font-weight: 600;
-      font-size: 7.5pt;
-      padding-top: 2px;
-    }
+            #label-container {
+                width: 295px;
+                height: 189px;
+                margin: 0 !important;
+                padding: 1mm !important;
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                overflow: hidden !important;
+                page-break-after: always;
+            }
 
-    @media print {
-      html, body {
-        width: 78mm;
-        height: 50mm;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: none !important;
-      }
+            .no-print { display: none !important; }
+        }
 
-      #label-container {
-        width: 295px;
-        height: 189px;
-        margin: 0;
-        border: none;
-        box-shadow: none;
-        page-break-after: always;
-      }
+        body { background-color: #f0f4f8; padding: 1rem; }
 
-      .no-print { display: none !important; }
-    }
-
-    /* UI and Modal */
-    .modal-bg {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-    }
-    .modal-content {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 0.75rem;
-      max-width: 400px;
-      width: 90%;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-  </style>
+        /* Modal Styling */
+        #print-guide-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        #print-guide-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Pre-Print Controls -->
-  <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md mb-6 text-center">
-    <h1 class="text-lg font-semibold mb-2 text-gray-800">Label Printer (78mm x 50mm)</h1>
-    <p class="text-sm text-gray-600 mb-4">ពិនិត្យទិន្នន័យ មុនព្រីន។ អក្សរពណ៌ខ្មៅស្អាត សម្រាប់ Thermal Printer។</p>
+    <!-- UI មុនព្រីន -->
+    <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6 text-center">
+        <h1 class="text-xl font-bold text-gray-800 mb-2">ទម្រង់ព្រីន Label</h1>
+        <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពម្ព។ ទំហំ (78mm x 50mm)</p>
 
-    <div class="flex flex-col gap-2">
-      <button id="guideButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition">
-        ℹ️ ព័ត៌មានបោះពុម្ព (Print Guide)
-      </button>
+        <div class="flex flex-col gap-2">
+            <button id="guideButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                ℹ️ ព័ត៌មានបោះពុម្ព (Print Guide)
+            </button>
 
-      <button id="printButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
-        ✅ Print Label នេះ
-      </button>
-    </div>
-  </div>
-
-  <!-- Print Guide Modal -->
-  <div id="print-guide-modal" class="modal-bg flex">
-    <div class="modal-content text-center">
-      <h2 class="text-lg font-semibold mb-2">ការកំណត់ Printer ត្រឹមត្រូវ</h2>
-      <ul class="list-disc pl-5 text-left text-sm mb-4">
-        <li>Destination: <b>EML-200L (2 inch)</b></li>
-        <li>Paper size: <b>Custom 78mm × 50mm</b></li>
-        <li>Scale: <b>100% (Actual Size)</b></li>
-        <li>Margins: <b>None</b></li>
-        <li>Background graphics: <b>ON</b></li>
-      </ul>
-      <button id="closeGuide" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg w-full">បិទ</button>
-    </div>
-  </div>
-
-  <!-- Label -->
-  <div id="label-container">
-    <div class="label-header">
-      <span>Page: <span id="label-page">N/A</span></span>
-      <span>User: <span id="label-user">N/A</span></span>
-      <span>ID: <span id="label-order-id">ORD-XXXXX</span></span>
+            <button id="printButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
+                ✅ Print Label នេះ
+            </button>
+        </div>
     </div>
 
-    <div class="info-section">
-      <div class="info-block left">
-        <div>
-          <div class="label-title">អ្នកទទួល / Recipient:</div>
-          <div id="label-name" class="label-value">ឈ្មោះអតិថិជន</div>
-          <div id="label-phone" class="label-value">0xx xxx xxx</div>
+    <!-- Modal (Print Guide) -->
+    <div id="print-guide-modal" class="no-print flex">
+        <div id="print-guide-content">
+            <h2 class="text-lg font-bold mb-2 text-gray-800">ការកំណត់ Printer ត្រឹមត្រូវ</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 mb-4 text-left">
+                <li>ជ្រើស <strong>Destination:</strong> EML-200L (2 inch)</li>
+                <li><strong>Paper size:</strong> Custom 78mm × 50mm</li>
+                <li><strong>Scale:</strong> 100% (Actual Size)</li>
+                <li><strong>Margins:</strong> None</li>
+                <li><strong>Background graphics:</strong> ON</li>
+            </ul>
+            <button id="closeGuide" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">បិទ</button>
         </div>
-        <div>
-          <div class="label-title">ទីតាំង / Location:</div>
-          <div id="label-location" class="label-value">ភ្នំពេញថ្មី</div>
-          <div class="label-title">អាសយដ្ឋាន / Address:</div>
-          <div id="label-address" class="label-value">(មិនបានបញ្ជាក់)</div>
-        </div>
-      </div>
-
-      <div class="info-block right">
-        <div>
-          <div class="label-title">កាលបរិច្ឆេទ:</div>
-          <div id="label-date" class="label-value">DD/MM/YYYY</div>
-        </div>
-        <div>
-          <div class="total-box">តម្លៃសរុប: <span id="label-total">$0.00</span></div>
-        </div>
-        <div>
-          <div class="label-title">ស្ថានភាពបង់ប្រាក់:</div>
-          <div id="label-payment" class="label-value">Unpaid</div>
-          <div class="label-title">ដឹកជញ្ជូនដោយ:</div>
-          <div id="label-shipping" class="label-value">N/A</div>
-        </div>
-      </div>
     </div>
 
-    <div class="label-footer">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន!</div>
-  </div>
+    <!-- Label Container -->
+    <div id="label-container">
+        <div class="label-header">
+            <!-- Data will be black by inheritance -->
+            <span>Page: <span id="label-page">N/A</span></span>
+            <span>User: <span id="label-user">N/A</span></span>
+            <span>ID: <span id="label-order-id">ORD-XXXXX</span></span>
+        </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
-      if (params.id) {
-        document.getElementById('label-page').textContent = params.page || 'N/A';
-        document.getElementById('label-user').textContent = params.user || 'N/A';
-        document.getElementById('label-order-id').textContent = params.id || 'N/A';
-        document.getElementById('label-name').textContent = params.name || 'N/A';
-        document.getElementById('label-phone').textContent = params.phone || 'N/A';
-        document.getElementById('label-location').textContent = params.location || 'N/A';
-        document.getElementById('label-address').textContent = params.address || '(មិនបានបញ្ជាក់)';
-        document.getElementById('label-total').textContent = params.total ? `$${parseFloat(params.total).toFixed(2)}` : 'N/A';
-        document.getElementById('label-payment').textContent = params.payment || 'Unpaid';
-        document.getElementById('label-shipping').textContent = params.shipping || 'N/A';
+        <div class="info-row">
+            <div class="info-block left">
+                <div class="small-text">អ្នកទទួល / Recipient:</div>
+                <div id="label-name" class="big-text">ឈ្មោះអតិថិជន</div>
+                <div id="label-phone">0xx xxx xxx</div>
+
+                <div class="small-text" style="margin-top: 0.5mm;">ទីតាំង / Location:</div>
+                <div id="label-location" class="data-text">ភ្នំពេញថ្មី</div>
+
+                <div class="small-text" style="margin-top: 0.5mm;">អាសយដ្ឋាន / Address:</div>
+                <div id="label-address" class="data-text">(មិនបានបញ្ជាក់)</div>
+            </div>
+
+            <div class="info-block right">
+                <div class="small-text">កាលបរិច្ឆេទ:</div>
+                <div id="label-date" class="data-text">DD/MM/YYYY</div>
+
+                <div class="total-box">តម្លៃសរុប: <span id="label-total">$0.00</span></div>
+
+                <div class="small-text" style="margin-top: 0.5mm;">ស្ថានភាពបង់ប្រាក់:</div>
+                <div id="label-payment" class="data-text">Unpaid</div>
+
+                <div class="small-text" style="margin-top: 0.5mm;">ដឹកជញ្ជូនដោយ:</div>
+                <div id="label-shipping" class="data-text">N/A</div>
+            </div>
+        </div>
+
+        <div class="label-footer">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន!</div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // ប្រើ URLSearchParams ថ្មីដែលងាយស្រួលអានជាង
+    const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
+    
+    // ពិនិត្យមើលថា params.id មានពិតប្រាកដ
+    if (params.id) {
+        document.getElementById('label-page').textContent = decodeURIComponent(params.page || 'N/A');
+        document.getElementById('label-user').textContent = decodeURIComponent(params.user || 'N/A');
+        document.getElementById('label-order-id').textContent = decodeURIComponent(params.id || 'N/A');
+        document.getElementById('label-name').textContent = decodeURIComponent(params.name || 'N/A');
+        document.getElementById('label-phone').textContent = decodeURIComponent(params.phone || 'N/A');
+        document.getElementById('label-location').textContent = decodeURIComponent(params.location || 'N/A');
+        document.getElementById('label-address').textContent = decodeURIComponent(params.address || '(មិនបានបញ្ជាក់)');
+        
+        const total = parseFloat(params.total);
+        document.getElementById('label-total').textContent = !isNaN(total) ? `$${total.toFixed(2)}` : 'N/A';
+        
+        document.getElementById('label-payment').textContent = decodeURIComponent(params.payment || 'Unpaid');
+        document.getElementById('label-shipping').textContent = decodeURIComponent(params.shipping || 'N/A');
 
         const today = new Date();
-        const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth()+1).padStart(2, '0')}/${today.getFullYear()}`;
+        const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
         document.getElementById('label-date').textContent = d;
-      }
+    } else {
+        // បើកគ្មាន ID គឺលាក់ Label ហើយបង្ហាញតែ UI
+        document.getElementById('label-container').style.display = 'none';
+        document.getElementById('printButton').disabled = true;
+        document.getElementById('printButton').textContent = '❌ គ្មានទិន្នន័យ';
+    }
 
-      document.getElementById('printButton').addEventListener('click', () => window.print());
-      const guideBtn = document.getElementById('guideButton');
-      const guideModal = document.getElementById('print-guide-modal');
-      const closeGuide = document.getElementById('closeGuide');
-      guideBtn.addEventListener('click', () => guideModal.style.display = 'flex');
-      closeGuide.addEventListener('click', () => guideModal.style.display = 'none');
+    // Print button
+    document.getElementById('printButton').addEventListener('click', () => window.print());
+
+    // Guide modal
+    const guideBtn = document.getElementById('guideButton');
+    const guideModal = document.getElementById('print-guide-modal');
+    const closeGuide = document.getElementById('closeGuide');
+
+    guideBtn.addEventListener('click', () => guideModal.style.display = 'flex');
+    closeGuide.addEventListener('click', () => guideModal.style.display = 'none');
+    
+    // NEW: បិទ Modal ពេលចុចក្រៅ Content
+    guideModal.addEventListener('click', (e) => {
+        if (e.target === guideModal) {
+            guideModal.style.display = 'none';
+        }
     });
-  </script>
+
+    // NEW: ធ្វើបច្ចុប្បន្នភាព JavaScript logic ដើម្បីដោះស្រាយ decodeURIComponent លើទិន្នន័យទាំងអស់
+    // (បានបញ្ចូលទៅក្នុង if (params.id) block ខាងលើរួចរាល់)
+});
+</script>
+
 </body>
 </html>
+
