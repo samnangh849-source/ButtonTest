@@ -9,11 +9,8 @@
             box-sizing: border-box;
             font-family: 'Arial', 'Inter', sans-serif;
         }
-        *, *:before, *:after {
-            box-sizing: inherit;
-        }
+        *, *:before, *:after { box-sizing: inherit; }
 
-        /* --- FIX: កំណត់ទំហំត្រឹមត្រូវជាផ្ទាល់ដោយ Pixel (1mm ≈ 3.78px) --- */
         #label-container {
             width: 295px;   /* 78mm */
             height: 189px;  /* 50mm */
@@ -29,7 +26,6 @@
             border: 1px dashed #ccc;
         }
 
-        /* --- HEADER --- */
         .label-header {
             border-bottom: 1px dashed #000;
             display: flex;
@@ -39,7 +35,6 @@
             padding-bottom: 1mm;
         }
 
-        /* --- MAIN INFO --- */
         .info-row {
             display: flex;
             justify-content: space-between;
@@ -47,35 +42,18 @@
             gap: 1mm;
         }
 
-        .info-block {
-            flex: 1;
-        }
-
+        .info-block { flex: 1; }
         .info-block.right {
             text-align: right;
             border-left: 1px dashed #ccc;
             padding-left: 1mm;
             width: 40%;
         }
+        .info-block.left { width: 60%; }
 
-        .info-block.left {
-            width: 60%;
-        }
-
-        .big-text {
-            font-size: 10pt;
-            font-weight: 700;
-        }
-
-        .small-text {
-            font-size: 7pt;
-            color: #4b5563;
-        }
-
-        .data-text {
-            font-size: 9pt;
-            font-weight: 500;
-        }
+        .big-text { font-size: 10pt; font-weight: 700; }
+        .small-text { font-size: 7pt; color: #4b5563; }
+        .data-text { font-size: 9pt; font-weight: 500; }
 
         .total-box {
             background-color: #f3f4f6;
@@ -95,7 +73,6 @@
             padding-top: 1mm;
         }
 
-        /* --- PRINT MODE FIX --- */
         @media print {
             html, body {
                 width: 78mm;
@@ -117,39 +94,72 @@
                 page-break-after: always;
             }
 
-            .no-print {
-                display: none !important;
-            }
+            .no-print { display: none !important; }
         }
 
-        /* --- SCREEN VIEW --- */
-        body {
-            background-color: #f0f4f8;
-            padding: 1rem;
+        body { background-color: #f0f4f8; padding: 1rem; }
+
+        /* Modal Styling */
+        #print-guide-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        #print-guide-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
     </style>
 </head>
 <body>
 
     <!-- UI មុនព្រីន -->
-    <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6">
+    <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6 text-center">
         <h1 class="text-xl font-bold text-gray-800 mb-2">ទម្រង់ព្រីន Label</h1>
-        <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពុម្ព។ ទំហំត្រូវបានកំណត់ (78mm x 50mm)។</p>
-        <button id="printButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 mt-5">
-            ✅ Print Label នេះ
-        </button>
+        <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពុម្ព។ ទំហំ (78mm x 50mm)</p>
+
+        <div class="flex flex-col gap-2">
+            <button id="guideButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                ℹ️ ព័ត៌មានបោះពុម្ព (Print Guide)
+            </button>
+
+            <button id="printButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
+                ✅ Print Label នេះ
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal (Print Guide) -->
+    <div id="print-guide-modal" class="no-print flex">
+        <div id="print-guide-content">
+            <h2 class="text-lg font-bold mb-2 text-gray-800">ការកំណត់ Printer ត្រឹមត្រូវ</h2>
+            <ul class="list-disc pl-5 text-sm text-gray-700 mb-4 text-left">
+                <li>ជ្រើស <strong>Destination:</strong> EML-200L (2 inch)</li>
+                <li><strong>Paper size:</strong> Custom 78mm × 50mm</li>
+                <li><strong>Scale:</strong> 100% (Actual Size)</li>
+                <li><strong>Margins:</strong> None</li>
+                <li><strong>Background graphics:</strong> ON</li>
+            </ul>
+            <button id="closeGuide" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">បិទ</button>
+        </div>
     </div>
 
     <!-- Label Container -->
     <div id="label-container">
-        <!-- HEADER -->
         <div class="label-header">
             <span>Page: <span id="label-page">N/A</span></span>
             <span>User: <span id="label-user">N/A</span></span>
             <span>ID: <span id="label-order-id">ORD-XXXXX</span></span>
         </div>
 
-        <!-- INFO ROW -->
         <div class="info-row">
             <div class="info-block left">
                 <div class="small-text font-bold">អ្នកទទួល / Recipient:</div>
@@ -177,7 +187,6 @@
             </div>
         </div>
 
-        <!-- FOOTER -->
         <div class="label-footer">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន!</div>
     </div>
 
@@ -201,10 +210,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('label-date').textContent = d;
     }
 
-    document.getElementById('printButton').addEventListener('click', () => {
-        alert("សូមប្រាកដថា Chrome Printer Settings → Scale = 100% និង Margin = None មុនព្រីន!");
-        window.print();
-    });
+    // Print button
+    document.getElementById('printButton').addEventListener('click', () => window.print());
+
+    // Guide modal
+    const guideBtn = document.getElementById('guideButton');
+    const guideModal = document.getElementById('print-guide-modal');
+    const closeGuide = document.getElementById('closeGuide');
+
+    guideBtn.addEventListener('click', () => guideModal.style.display = 'flex');
+    closeGuide.addEventListener('click', () => guideModal.style.display = 'none');
 });
 </script>
 
