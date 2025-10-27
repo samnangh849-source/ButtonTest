@@ -161,7 +161,7 @@
     <!-- UI មុនព្រីន -->
     <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6 text-center">
         <h1 class="text-xl font-bold text-gray-800 mb-2">ទម្រង់ព្រីន Label</h1>
-        <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពុម្ព។ ទំហំ (78mm x 50mm)</p>
+        <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពម្ព។ ទំហំ (78mm x 50mm)</p>
 
         <div class="flex flex-col gap-2">
             <button id="guideButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
@@ -238,29 +238,45 @@ document.addEventListener('DOMContentLoaded', () => {
     // ប្រើ URLSearchParams ថ្មីដែលងាយស្រួលអានជាង
     const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
     
-    // --- NEW: មុខងារសម្លេង (Speech Synthesis) ដែលអាចប្រើឡើងវិញបាន ---
+    // --- UPDATED: មុខងារសម្លេង (Speech Synthesis) ដែលអាចប្រើឡើងវិញបាន ---
     function speakText(textToSpeak, lang = 'km-KH', rate = 0.9) {
-        // ពិនិត្យមើលថា browser គាំទ្រ TTS
-        if ('speechSynthesis' in window) {
-            // បញ្ឈប់សម្លេងចាស់ (ប្រសិនបើមាន)
-            window.speechSynthesis.cancel();
-            
-            // បង្កើត object សម្លេង
-            const utterance = new SpeechSynthesisUtterance(textToSpeak);
-            
-            // កំណត់ភាសាជាខ្មែរ
-            utterance.lang = lang;
-            
-            // កំណត់ល្បឿន និងកម្រិតសម្លេង
-            utterance.pitch = 1; // 1 = default
-            utterance.rate = rate;
-            
-            // ចាប់ផ្តើមអាន
-            window.speechSynthesis.speak(utterance);
-            return true; // ដំណើរការ
-        } else {
+        if (!('speechSynthesis' in window)) {
+            console.error("Browser មិនគាំទ្រ Speech Synthesis");
             return false; // មិនដំណើរការ
         }
+        
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        
+        // --- NEW LOGIC: ស្វែងរកសម្លេងខ្មែរពិតប្រាកដ ---
+        const voices = window.speechSynthesis.getVoices();
+        const khmerVoice = voices.find(voice => voice.lang === 'km-KH');
+        
+        if (khmerVoice) {
+            // ប្រសិនបើរកឃើញ, ប្រើសម្លេងនោះ (នេះគឺត្រឹមត្រូវបំផុត)
+            utterance.voice = khmerVoice;
+        } else {
+            // បើមិនឃើញ, ប្រើ lang ជា fallback (អាចនឹងមិនដំណើរការ)
+            utterance.lang = lang;
+            console.warn("មិនអាចរកសម្លេង 'km-KH' បានទេ។ Browser អាចនឹងប្រើសម្លេង Default។");
+        }
+        // --- ចប់ផ្នែកកែសម្រួល ---
+        
+        utterance.pitch = 1;
+        utterance.rate = rate;
+        
+        window.speechSynthesis.speak(utterance);
+        return true; // ដំណើរការ
+    }
+    
+    // --- NEW: ព្យាយាមផ្ទុក Voices ទុកជាមុន ---
+    // ពេលខ្លះ getVoices() គឺទទេ (empty) ពេល page load
+    // នេះជួយជំរុញឱ្យវាផ្ទុក
+    if ('speechSynthesis' in window && window.speechSynthesis.onvoiceschanged !== undefined) {
+         window.speechSynthesis.onvoiceschanged = () => {
+            // គ្រាន់តែហៅវាដើម្បីឱ្យប្រាកដថា list ត្រូវបានផ្ទុក
+            window.speechSynthesis.getVoices();
+         };
     }
     
     // ពិនិត្យមើលថា params.id មានពិតប្រាកដ
