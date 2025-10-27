@@ -8,9 +8,15 @@
     <!-- Tailwind CSS សម្រាប់ភាពងាយស្រួលក្នុងការរចនា UI មើលទៅស្អាតនៅលើទូរស័ព្ទ -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* REMOVED: :root variables removed */
+        /* --- FIX: បន្ថែម box-sizing ដើម្បីធានាថា padding ត្រូវបានរួមបញ្ចូលក្នុងទំហំសរុប --- */
+        html, body {
+            box-sizing: border-box;
+            font-family: 'Arial', 'Inter', sans-serif; /* Arial គឺល្អសម្រាប់ printer */
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
 
-        /* MODIFIED: Reverted to simple @page rule */
         @page {
             size: 78mm 50mm;
             margin: 0;
@@ -25,46 +31,42 @@
                 margin: 0;
                 padding: 0;
             }
-            /* MODIFIED: Reverted to hard-coded size */
             #label-container {
                 width: 78mm;
                 height: 50mm;
                 margin: 0;
-                box-shadow: none; /* លាក់ Shadow ពេល Print */
-                transform: scale(1); /* ធានាថាមិនមានការបង្រួម/ពង្រីក */
+                box-shadow: none; 
+                transform: scale(1); 
                 border: none;
             }
         }
 
         /* សម្រាប់មើលនៅលើអេក្រង់ (Mobile Responsive) */
         body {
-            font-family: 'Inter', sans-serif;
             background-color: #f0f4f8;
             padding: 1rem;
         }
 
-        /* MODIFIED: Reverted to hard-coded size */
         #label-container {
             width: 78mm; 
             height: 50mm;
             background-color: white;
-            padding: 2mm; 
+            padding: 1.5mm; /* --- FIX: កាត់បន្ថយ padding បន្តិចដើម្បីសន្សំកន្លែង --- */
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
             border-radius: 0.25rem;
             margin: 20px auto;
             display: flex;
             flex-direction: column;
             font-size: 8pt; 
-            line-height: 1.2; 
+            line-height: 1.15; /* --- FIX: កាត់បន្ថយ line-height បន្តិច --- */
             overflow: hidden;
             border: 1px dashed #ccc; 
-            /* REMOVED: Transition no longer needed */
         }
 
         .label-header {
-            border-bottom: 1px dashed #000;
-            padding-bottom: 0.5mm; 
-            margin-bottom: 0.5mm; 
+            border-bottom: 1px dashed #000; /* --- FIX: កាត់បន្ថយ border --- */
+            padding-bottom: 0.2mm; /* --- FIX: កាត់បន្ថយ --- */
+            margin-bottom: 0.2mm; /* --- FIX: កាត់បន្ថយ --- */
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -78,7 +80,7 @@
             justify-content: space-between;
             align-items: flex-start;
             flex-grow: 1; 
-            gap: 2mm; 
+            gap: 1.5mm; /* --- FIX: កាត់បន្ថយ gap --- */
             min-height: 0; 
         }
         
@@ -90,7 +92,7 @@
         .info-block.right {
             text-align: right;
             border-left: 1px dashed #ccc;
-            padding-left: 2mm;
+            padding-left: 1.5mm; /* --- FIX: កាត់បន្ថយ --- */
             flex-shrink: 0; 
             width: 40%; 
         }
@@ -117,19 +119,31 @@
             color: #000;
             word-wrap: break-word;
         }
+        
+        /* --- FIX: កាត់បន្ថយទំហំអក្សរ phone --- */
+        #label-phone {
+            font-size: 11pt; 
+            font-weight: 700;
+            color: #000;
+        }
 
         .total-box {
             background-color: #f3f4f6; 
             color: #000; 
-            padding: 1mm 1.5mm;
+            padding: 0.5mm 1mm; /* --- FIX: កាត់បន្ថយ padding --- */
             border-radius: 0.125rem;
-            margin-top: 1mm;
+            margin-top: 0.5mm; /* --- FIX: កាត់បន្ថយ margin --- */
             font-weight: 700;
             font-size: 10pt;
             text-align: center;
         }
         
-        /* Style សម្រាប់ស្ថានភាពបង់ប្រាក់ */
+        /* --- FIX: កាត់បន្ថយទំហំអក្សរ total --- */
+        #label-total {
+            font-size: 11pt;
+            font-weight: 700;
+        }
+
         #label-payment.paid {
             color: #000; 
             font-weight: 700;
@@ -140,9 +154,9 @@
         }
         
         .label-footer {
-            margin-top: 0.5mm;
-            padding-top: 0.5mm;
-            border-top: 2px dashed #000;
+            margin-top: 0.2mm; /* --- FIX: កាត់បន្ថយ --- */
+            padding-top: 0.2mm; /* --- FIX: កាត់បន្ថយ --- */
+            border-top: 1px dashed #000; /* --- FIX: កាត់បន្ថយ border --- */
             display: flex;
             justify-content: center; 
             align-items: center;
@@ -157,8 +171,6 @@
     <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6">
         <h1 class="text-xl font-bold text-gray-800 mb-2">ទម្រង់ព្រីន Label</h1>
         <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពុម្ព។ ទំហំត្រូវបានកំណត់ (78mm x 50mm)។</p>
-        
-        <!-- REMOVED: ផ្នែកសម្រាប់ជ្រើសរើសទំហំ -->
         
         <button id="printButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 mt-5">
             ✅ Print Label នេះ
@@ -181,7 +193,7 @@
             <div class="info-block left">
                 <div class="small-text font-bold text-gray-700">អ្នកទទួល / Recipient:</div>
                 <div id="label-name" class="big-text text-black">ឈ្មោះអតិថិជន</div>
-                <div id="label-phone" class="font-bold text-base text-black">0xx xxx xxx</div>
+                <div id="label-phone" class="text-black">0xx xxx xxx</div>
                 
                 <div class="small-text font-bold text-gray-700">ទីតាំង / Location:</div>
                 <div id="label-location" class="data-text text-black" style="font-size: 11pt; font-weight: 700; line-height: 1.2;">ភ្នំពេញថ្មី, ផ្លូវ 1003</div>
@@ -196,7 +208,7 @@
                 <div id="label-date" class="data-text text-black">DD/MM/YYYY</div>
                 
                 <div class="total-box bg-gray-100 text-black">
-                    តម្លៃសរុប: <span id="label-total" class="text-base font-bold">$0</span>
+                    តម្លៃសរុប: <span id="label-total" class="font-bold">$0</span>
                 </div>
                 
                 <div class="small-text font-bold text-gray-700">ស្ថានភាពបង់ប្រាក់:</div>
