@@ -36,14 +36,14 @@
             margin: 0 auto;
             /* គម្លាត 1mm លើក្រោម, 3mm ឆ្វេងស្តាំ */
             padding: 1mm 3mm; 
-            display: flex; /* This will be overridden by JS if styles are loaded */
+            display: flex; /* *** MODIFIED: This layout is now PERMANENT *** */
             flex-direction: column;
             justify-content: space-between;
             font-size: 8pt;
             line-height: 1.15;
             overflow: hidden;
             border: 1px dashed #ccc;
-            position: relative; /* *** NEW: Required for absolute positioning *** */
+            position: relative; /* Kept for safety, but not for dragging */
         }
 
         .label-header {
@@ -137,7 +137,7 @@
             }
 
             .no-print { display: none !important; }
-            #styleEditor { display: none !important; } /* *** NEW: Hide editor when printing *** */
+            #styleEditor { display: none !important; }
         }
         /* ---------------- END PRINT STYLES ---------------- */
 
@@ -168,8 +168,9 @@
             cursor: default;
             transition: outline 0.1s ease-in-out;
         }
+        /* *** MODIFIED: Removed 'move' cursor, changed to 'text' *** */
         .design-mode-active .editable-element {
-            cursor: move; /* 'move' cursor when editable */
+            cursor: text; /* 'text' cursor when editable */
         }
         .editable-element.selected {
             outline: 2px dashed #007bff; /* Highlight selected */
@@ -256,8 +257,6 @@
 
         <!-- *** Design Mode Toggle *** -->
         <div class="border-b border-gray-200 pb-4 mb-4">
-            <!-- *** REMOVED (Request 1) *** -->
-            <!-- <h2 class="text-md font-bold text-gray-700 mb-3 text-left">โหมดออกแบบ (Design Mode)</h2> -->
             <label class="flex items-center cursor-pointer">
                 <input type="checkbox" id="designModeToggle" class="form-checkbox h-5 w-5 text-blue-600">
                 <span class="ml-2 text-sm text-gray-700">កែរចនាបទ Label</span>
@@ -530,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // ------------------- *** Design Mode Logic *** -------------------
+    // ------------------- *** MODIFIED: Design Mode Logic (No Dragging) *** -------------------
     const designModeToggle = document.getElementById('designModeToggle');
     const styleEditor = document.getElementById('styleEditor');
     const editorTitle = document.getElementById('editorTitle');
@@ -548,26 +547,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isDesignMode = false;
     let selectedElement = null;
-    let isDragging = false;
-    let offsetX, offsetY;
+    // *** REMOVED Dragging variables (isDragging, offsetX, offsetY) ***
 
     // 1. Load Saved Styles on Page Load
     function loadAllStyles() {
         const savedStyles = JSON.parse(localStorage.getItem(STYLES_KEY) || '{}');
-        if (Object.keys(savedStyles).length === 0) {
-            return; // No saved styles, use default flex layout
-        }
-
-        // If styles exist, force absolute positioning
-        labelContainer.style.display = 'block'; // Override flex
-        document.getElementById('info-row-el').style.display = 'block';
+        // *** REMOVED Layout switching logic ***
         
         editableElements.forEach(el => {
             const style = savedStyles['#' + el.id];
             if (style) {
-                el.style.position = 'absolute';
-                el.style.top = style.top;
-                el.style.left = style.left;
+                // *** REMOVED top/left loading ***
                 el.style.fontSize = style.fontSize;
             }
         });
@@ -578,44 +568,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!element) return;
         const savedStyles = JSON.parse(localStorage.getItem(STYLES_KEY) || '{}');
         
+        // *** MODIFIED: Only save fontSize ***
         const styleData = {
-            top: element.style.top,
-            left: element.style.left,
             fontSize: element.style.fontSize
         };
-        savedStyles['#' + element.id] = styleData;
+
+        // Check if element already has saved style, if so, preserve other properties (like position, if it was saved before)
+        let existingStyle = savedStyles['#' + element.id] || {};
+        existingStyle.fontSize = styleData.fontSize; // Only update font size
+        
+        savedStyles['#' + element.id] = existingStyle;
         localStorage.setItem(STYLES_KEY, JSON.stringify(savedStyles));
     }
 
-    // 3. Convert from Flex to Absolute (Run ONCE when first edit occurs)
-    function convertToAbsolute() {
-        // *** MODIFIED (Request 1): Check if already converted ***
-        if (localStorage.getItem(STYLES_KEY)) return; // Already converted
-
-        labelContainer.style.display = 'block'; // Override flex
-        document.getElementById('info-row-el').style.display = 'block';
-
-        const savedStyles = {};
-        const parentRect = labelContainer.getBoundingClientRect();
-
-        editableElements.forEach(el => {
-            const rect = el.getBoundingClientRect();
-            const top = rect.top - parentRect.top;
-            const left = rect.left - parentRect.left;
-            const fontSize = window.getComputedStyle(el).fontSize;
-
-            el.style.position = 'absolute';
-            el.style.top = `${top}px`;
-            el.style.left = `${left}px`;
-            
-            savedStyles['#' + el.id] = {
-                top: `${top}px`,
-                left: `${left}px`,
-                fontSize: fontSize
-            };
-        });
-        localStorage.setItem(STYLES_KEY, JSON.stringify(savedStyles));
-    }
+    // *** REMOVED convertToAbsolute() function ***
 
     // 4. Show/Hide Style Editor
     function showEditor(element) {
@@ -623,108 +589,48 @@ document.addEventListener('DOMContentLoaded', () => {
         editableElements.forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
 
-        // *** CHANGED (Request 2): Position editor at bottom ***
         styleEditor.style.bottom = '10px'; // Slide in
 
         editorTitle.textContent = `Edit: #${element.id}`;
-        editorFontSize.value = parseFloat(window.getComputedStyle(element).fontSize);
+        // *** MODIFIED: Ensure we get computed style if no inline style exists ***
+        let currentSize = element.style.fontSize;
+        if (!currentSize) {
+            currentSize = window.getComputedStyle(element).fontSize;
+        }
+        editorFontSize.value = parseFloat(currentSize);
     }
 
     function hideEditor() {
-        // *** CHANGED (Request 2): Slide out ***
         styleEditor.style.bottom = '-200px'; 
-
         if (selectedElement) {
             selectedElement.classList.remove('selected');
         }
         selectedElement = null;
     }
 
-    // 5. Drag and Drop Event Handlers
-    function onDragStart(e) {
-        if (!isDesignMode || !selectedElement) return;
-        isDragging = true;
-        
-        let event = e.touches ? e.touches[0] : e;
-        offsetX = event.clientX - selectedElement.getBoundingClientRect().left;
-        offsetY = event.clientY - selectedElement.getBoundingClientRect().top;
-        
-        // Prevent text selection
-        e.preventDefault();
-    }
-
-    function onDrag(e) {
-        if (!isDragging || !selectedElement) return;
-
-        let event = e.touches ? e.touches[0] : e;
-        const parentRect = labelContainer.getBoundingClientRect();
-
-        let newLeft = event.clientX - parentRect.left - offsetX;
-        let newTop = event.clientY - parentRect.top - offsetY;
-
-        // Snap to grid or boundaries (optional, simple version here)
-        newLeft = Math.max(0, Math.min(newLeft, parentRect.width - selectedElement.offsetWidth));
-        newTop = Math.max(0, Math.min(newTop, parentRect.height - selectedElement.offsetHeight));
-
-        selectedElement.style.left = `${newLeft}px`;
-        selectedElement.style.top = `${newTop}px`;
-    }
-
-    function onDragEnd(e) {
-        if (isDragging) {
-            saveStyle(selectedElement); // Save the final position
-        }
-        isDragging = false;
-    }
+    // *** REMOVED Drag and Drop Event Handlers (onDragStart, onDrag, onDragEnd) ***
+    // *** REMOVED Global Listener handlers (handleDragMove, handleDragEnd, etc.) ***
 
     // 6. Main Toggle Logic
-    // *** MODIFIED (Request 2): Created separate handlers to add/remove ***
-    function handleDragMove(e) {
-        onDrag(e);
-    }
-    function handleDragEnd(e) {
-        onDragEnd(e);
-    }
-    function addGlobalListeners() {
-        window.addEventListener('mousemove', handleDragMove);
-        window.addEventListener('touchmove', handleDragMove, { passive: false });
-        window.addEventListener('mouseup', handleDragEnd);
-        window.addEventListener('touchend', handleDragEnd);
-    }
-    function removeGlobalListeners() {
-        window.removeEventListener('mousemove', handleDragMove);
-        window.removeEventListener('touchmove', handleDragMove, { passive: false });
-        window.removeEventListener('mouseup', handleDragEnd);
-        window.removeEventListener('touchend', handleDragEnd);
-    }
-
     editableElements.forEach(el => {
         const handleEditStart = (ev) => {
             if (!isDesignMode) return;
-            
-            if (!localStorage.getItem(STYLES_KEY)) {
-                convertToAbsolute();
-            }
-            
+            // *** MODIFIED: This function now ONLY shows the editor ***
             showEditor(el);
-            onDragStart(ev);
         };
-        el.addEventListener('mousedown', handleEditStart);
-        el.addEventListener('touchstart', handleEditStart, { passive: false });
+        // *** MODIFIED: Changed to 'click' listener, removed mousedown/touchstart ***
+        el.addEventListener('click', handleEditStart);
     });
-
 
     designModeToggle.addEventListener('change', (e) => {
         isDesignMode = e.target.checked;
         if (isDesignMode) {
             labelContainer.classList.add('design-mode-active');
-            addGlobalListeners();
+            // *** REMOVED addGlobalListeners() ***
         } else {
-            // *** MODIFIED (Request 2): No refresh ***
             labelContainer.classList.remove('design-mode-active');
             hideEditor();
-            removeGlobalListeners();
-            // We set isDesignMode = false, so clicking elements won't trigger edits.
+            // *** REMOVED removeGlobalListeners() ***
         }
     });
 
@@ -732,10 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
     closeEditorBtn.addEventListener('click', hideEditor);
     editorFontSize.addEventListener('input', (e) => {
         if (selectedElement) {
-            if (!localStorage.getItem(STYLES_KEY)) {
-                convertToAbsolute();
-            }
-            
+            // *** REMOVED convertToAbsolute() check ***
             const newSize = parseFloat(e.target.value) || 10;
             selectedElement.style.fontSize = `${newSize}pt`;
             saveStyle(selectedElement);
