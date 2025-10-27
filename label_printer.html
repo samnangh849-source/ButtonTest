@@ -163,7 +163,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
-        /* *** NEW: Design Mode Styles *** */
+        /* *** Design Mode Styles *** */
         .editable-element {
             cursor: default;
             transition: outline 0.1s ease-in-out;
@@ -175,15 +175,24 @@
             outline: 2px dashed #007bff; /* Highlight selected */
             z-index: 10;
         }
+        
+        /* *** CHANGED (Request 2): Style Editor Position *** */
         #styleEditor {
-            position: fixed; /* Use fixed to float over everything */
+            position: fixed;
             z-index: 1001;
             background: white;
             padding: 0.75rem;
             border-radius: 0.5rem;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             border: 1px solid #ddd;
-            display: none; /* Hidden by default */
+            
+            /* New Position: Fixed at bottom-center */
+            bottom: -200px; /* Start hidden */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            max-width: 90%;
+            transition: bottom 0.3s ease-in-out;
         }
         /* *** END: Design Mode Styles *** */
 
@@ -250,13 +259,12 @@
             <h2 class="text-md font-bold text-gray-700 mb-3 text-left">โหมดออกแบบ (Design Mode)</h2>
             <label class="flex items-center cursor-pointer">
                 <input type="checkbox" id="designModeToggle" class="form-checkbox h-5 w-5 text-blue-600">
-                <!-- *** CHANGED (Request 1) *** -->
                 <span class="ml-2 text-sm text-gray-700">កែរចនាបទ Label</span>
             </label>
         </div>
         <!-- *** END: Design Mode Toggle *** -->
 
-        <!-- *** NEW (Request 2) *** -->
+        <!-- *** Reset Button *** -->
         <div class="border-b border-gray-200 pb-4 mb-4">
             <button id="resetDesignButton" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
                 Reset រចនាបទ ទៅដូចដើម
@@ -290,7 +298,7 @@
         </div>
     </div>
 
-    <!-- *** NEW: Style Editor Panel *** -->
+    <!-- *** Style Editor Panel *** -->
     <div id="styleEditor" class="no-print">
         <div class="flex justify-between items-center mb-2">
             <h4 id="editorTitle" class="text-sm font-bold">Edit Element</h4>
@@ -306,7 +314,7 @@
 
     <!-- Label Container -->
     <div id="label-container">
-        <!-- *** NEW: Added 'editable-element' class and unique IDs to all text elements *** -->
+        <!-- *** Added 'editable-element' class and unique IDs to all text elements *** -->
         <div class="label-header editable-element" id="label-header-el">
             <span>Page: <span id="label-page">N/A</span></span>
             <span>User: <span id="label-user">N/A</span></span>
@@ -530,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editableElements = document.querySelectorAll('.editable-element');
     const STYLES_KEY = 'labelStyles';
 
-    // *** NEW (Request 2): Reset Button Listener ***
+    // *** Reset Button Listener ***
     const resetDesignButton = document.getElementById('resetDesignButton');
     resetDesignButton.addEventListener('click', () => {
         localStorage.removeItem(STYLES_KEY);
@@ -580,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Convert from Flex to Absolute (Run ONCE when first edit occurs)
     function convertToAbsolute() {
-        // *** MODIFIED (Request 3): Check if already converted ***
+        // *** MODIFIED (Request 1): Check if already converted ***
         if (localStorage.getItem(STYLES_KEY)) return; // Already converted
 
         labelContainer.style.display = 'block'; // Override flex
@@ -614,22 +622,17 @@ document.addEventListener('DOMContentLoaded', () => {
         editableElements.forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
 
-        const rect = element.getBoundingClientRect();
-        styleEditor.style.display = 'block';
-        // Position editor above the element
-        let editorTop = window.scrollY + rect.top - styleEditor.offsetHeight - 10;
-        if (editorTop < window.scrollY + 10) { // If it goes off-screen top
-            editorTop = window.scrollY + rect.bottom + 10; // Position below
-        }
-        styleEditor.style.top = `${editorTop}px`;
-        styleEditor.style.left = `${window.scrollX + rect.left}px`;
+        // *** CHANGED (Request 2): Position editor at bottom ***
+        styleEditor.style.bottom = '10px'; // Slide in
 
         editorTitle.textContent = `Edit: #${element.id}`;
         editorFontSize.value = parseFloat(window.getComputedStyle(element).fontSize);
     }
 
     function hideEditor() {
-        styleEditor.style.display = 'none';
+        // *** CHANGED (Request 2): Slide out ***
+        styleEditor.style.bottom = '-200px'; 
+
         if (selectedElement) {
             selectedElement.classList.remove('selected');
         }
@@ -679,13 +682,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isDesignMode) {
             labelContainer.classList.add('design-mode-active');
             
-            // *** REMOVED convertToAbsolute() call (Request 3) ***
-
             editableElements.forEach(el => {
                 const handleEditStart = (ev) => {
                     if (!isDesignMode) return;
-
-                    // *** NEW LOGIC (Request 3) ***
+                    
+                    // *** MODIFIED (Request 1) ***
                     // Check if this is the first edit. If so, convert layout.
                     if (!localStorage.getItem(STYLES_KEY)) {
                         convertToAbsolute();
@@ -716,7 +717,7 @@ document.addEventListener('DOMContentLoaded', () => {
     closeEditorBtn.addEventListener('click', hideEditor);
     editorFontSize.addEventListener('input', (e) => {
         if (selectedElement) {
-            // *** NEW LOGIC (Request 3) ***
+            // *** MODIFIED (Request 1) ***
             // Check if this is the first edit. If so, convert layout.
             if (!localStorage.getItem(STYLES_KEY)) {
                 convertToAbsolute();
