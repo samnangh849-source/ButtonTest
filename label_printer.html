@@ -1,357 +1,212 @@
-<!-- នេះជាឯកសារ HTML តែមួយដែលដំណើរការជា Label Printing Service។ -->
-<!-- វានឹងអានទិន្នន័យពី URL, បង្ហាញក្នុងទំហំ 78mm x 50mm, និងត្រៀមសម្រាប់បោះពុម្ព។ -->
 <html lang="km">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Label Printer (78mm x 50mm)</title>
-    <!-- Tailwind CSS សម្រាប់ភាពងាយស្រួលក្នុងការរចនា UI មើលទៅស្អាតនៅលើទូរស័ព្ទ -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- NEW: បន្ថែម html2canvas library សម្រាប់ Download PNG -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoVBL5gD3tjIqdOyETU1AOH0upq+wQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
-        /* --- FIX: បន្ថែម box-sizing ដើម្បីធានាថា padding ត្រូវបានរួមបញ្ចូលក្នុងទំហំសរុប --- */
         html, body {
             box-sizing: border-box;
-            font-family: 'Arial', 'Inter', sans-serif; /* Arial គឺល្អសម្រាប់ printer */
+            font-family: 'Arial', 'Inter', sans-serif;
         }
         *, *:before, *:after {
             box-sizing: inherit;
         }
 
-        @page {
-            size: 78mm 50mm;
-            margin: 0;
-        }
-
-        /* លាក់ប៊ូតុង និង UI ផ្សេងៗនៅពេលបោះពុម្ព */
-        @media print {
-            .no-print {
-                display: none;
-            }
-            body {
-                margin: 0;
-                padding: 0;
-            }
-            #label-container {
-                width: 78mm;
-                height: 50mm;
-                margin: 0;
-                box-shadow: none; 
-                transform: scale(1); 
-                border: none;
-            }
-        }
-
-        /* សម្រាប់មើលនៅលើអេក្រង់ (Mobile Responsive) */
-        body {
-            background-color: #f0f4f8;
-            padding: 1rem;
-        }
-
+        /* --- FIX: កំណត់ទំហំត្រឹមត្រូវជាផ្ទាល់ដោយ Pixel (1mm ≈ 3.78px) --- */
         #label-container {
-            width: 78mm; 
-            height: 50mm;
+            width: 295px;   /* 78mm */
+            height: 189px;  /* 50mm */
             background-color: white;
-            padding: 1.5mm; /* --- FIX: កាត់បន្ថយ padding បន្តិចដើម្បីសន្សំកន្លែង --- */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
-            border-radius: 0.25rem;
-            margin: 20px auto;
+            margin: 0 auto;
+            padding: 1mm;
             display: flex;
             flex-direction: column;
-            font-size: 8pt; 
-            line-height: 1.15; /* --- FIX: កាត់បន្ថយ line-height បន្តិច --- */
+            justify-content: space-between;
+            font-size: 8pt;
+            line-height: 1.15;
             overflow: hidden;
-            border: 1px dashed #ccc; 
+            border: 1px dashed #ccc;
         }
 
+        /* --- HEADER --- */
         .label-header {
-            border-bottom: 1px dashed #000; /* --- FIX: កាត់បន្ថយ border --- */
-            padding-bottom: 0.2mm; /* --- FIX: កាត់បន្ថយ --- */
-            margin-bottom: 0.2mm; /* --- FIX: កាត់បន្ថយ --- */
+            border-bottom: 1px dashed #000;
             display: flex;
             justify-content: space-between;
-            align-items: center;
             font-size: 7pt;
-            font-weight: 700;
-            color: #4b5563;
+            font-weight: bold;
+            padding-bottom: 1mm;
         }
-        
+
+        /* --- MAIN INFO --- */
         .info-row {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            flex-grow: 1; 
-            gap: 1.5mm; /* --- FIX: កាត់បន្ថយ gap --- */
-            min-height: 0; 
+            flex-grow: 1;
+            gap: 1mm;
         }
-        
+
         .info-block {
             flex: 1;
-            min-width: 0; 
         }
 
         .info-block.right {
             text-align: right;
             border-left: 1px dashed #ccc;
-            padding-left: 1.5mm; /* --- FIX: កាត់បន្ថយ --- */
-            flex-shrink: 0; 
-            width: 40%; 
+            padding-left: 1mm;
+            width: 40%;
         }
-        
+
         .info-block.left {
-            width: 60%; 
+            width: 60%;
         }
 
         .big-text {
-            font-size: 10pt; 
+            font-size: 10pt;
             font-weight: 700;
-            word-wrap: break-word; 
-            color: #000;
         }
-        
+
         .small-text {
             font-size: 7pt;
             color: #4b5563;
         }
-        
+
         .data-text {
             font-size: 9pt;
             font-weight: 500;
-            color: #000;
-            word-wrap: break-word;
-        }
-        
-        /* --- FIX: កាត់បន្ថយទំហំអក្សរ phone --- */
-        #label-phone {
-            font-size: 11pt; 
-            font-weight: 700;
-            color: #000;
         }
 
         .total-box {
-            background-color: #f3f4f6; 
-            color: #000; 
-            padding: 0.5mm 1mm; /* --- FIX: កាត់បន្ថយ padding --- */
+            background-color: #f3f4f6;
+            color: #000;
+            padding: 0.5mm;
             border-radius: 0.125rem;
-            margin-top: 0.5mm; /* --- FIX: កាត់បន្ថយ margin --- */
             font-weight: 700;
             font-size: 10pt;
-            text-align: center;
-        }
-        
-        /* --- FIX: កាត់បន្ថយទំហំអក្សរ total --- */
-        #label-total {
-            font-size: 11pt;
-            font-weight: 700;
+            margin-top: 0.5mm;
         }
 
-        #label-payment.paid {
-            color: #000; 
-            font-weight: 700;
-        }
-        #label-payment.unpaid {
-            color: #000; 
-            font-weight: 700;
-        }
-        
         .label-footer {
-            margin-top: 0.2mm; /* --- FIX: កាត់បន្ថយ --- */
-            padding-top: 0.2mm; /* --- FIX: កាត់បន្ថយ --- */
-            border-top: 1px dashed #000; /* --- FIX: កាត់បន្ថយ border --- */
-            display: flex;
-            justify-content: center; 
-            align-items: center;
+            border-top: 1px dashed #000;
+            text-align: center;
+            font-size: 7pt;
+            font-weight: bold;
+            padding-top: 1mm;
         }
-        
-    </style>
-    
-</head>
-<body class="p-4">
 
-    <!-- Print Control UI -->
+        /* --- PRINT MODE FIX --- */
+        @media print {
+            html, body {
+                width: 78mm;
+                height: 50mm;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: none !important;
+            }
+
+            #label-container {
+                width: 295px;
+                height: 189px;
+                margin: 0 !important;
+                padding: 1mm !important;
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                overflow: hidden !important;
+                page-break-after: always;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* --- SCREEN VIEW --- */
+        body {
+            background-color: #f0f4f8;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- UI មុនព្រីន -->
     <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6">
         <h1 class="text-xl font-bold text-gray-800 mb-2">ទម្រង់ព្រីន Label</h1>
         <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពុម្ព។ ទំហំត្រូវបានកំណត់ (78mm x 50mm)។</p>
-        
         <button id="printButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 mt-5">
-            🖨️ Print Label នេះ
+            ✅ Print Label នេះ
         </button>
-        
-        <!-- NEW: ប៊ូតុង Download PNG -->
-        <button id="downloadButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 mt-3">
-            ⬇️ Download PNG
-        </button>
-        
-        <div id="loading" class="hidden text-center mt-3 text-sm text-gray-500">កំពុងទាញយកទិន្នន័យ...</div>
     </div>
 
-    <!-- Label Container (The 78x50mm area) -->
+    <!-- Label Container -->
     <div id="label-container">
         <!-- HEADER -->
         <div class="label-header">
-            <span>Page: <span id="label-page" class="text-black">N/A</span></span>
-            <span>User: <span id="label-user" class="text-black">N/A</span></span>
-            <span>ID: <span id="label-order-id" class="text-black">ORD-XXXXX</span></span>
+            <span>Page: <span id="label-page">N/A</span></span>
+            <span>User: <span id="label-user">N/A</span></span>
+            <span>ID: <span id="label-order-id">ORD-XXXXX</span></span>
         </div>
-        
-        <!-- MAIN INFO -->
+
+        <!-- INFO ROW -->
         <div class="info-row">
-            <!-- Left Block: Recipient Info -->
             <div class="info-block left">
-                <div class="small-text font-bold text-gray-700">អ្នកទទួល / Recipient:</div>
-                <div id="label-name" class="big-text text-black">ឈ្មោះអតិថិជន</div>
-                <div id="label-phone" class="text-black">0xx xxx xxx</div>
-                
-                <div class="small-text font-bold text-gray-700">ទីតាំង / Location:</div>
-                <div id="label-location" class="data-text text-black" style="font-size: 11pt; font-weight: 700; line-height: 1.2;">ភ្នំពេញថ្មី, ផ្លូវ 1003</div>
-                
-                <div class="small-text font-bold text-gray-700">អាសយដ្ឋាន / Address:</div>
-                <div id="label-address" class="data-text text-black" style="font-size: 7pt; line-height: 1.1;">(គ្មាន)</div>
+                <div class="small-text font-bold">អ្នកទទួល / Recipient:</div>
+                <div id="label-name" class="big-text">ឈ្មោះអតិថិជន</div>
+                <div id="label-phone">0xx xxx xxx</div>
+
+                <div class="small-text font-bold">ទីតាំង / Location:</div>
+                <div id="label-location" class="data-text">ភ្នំពេញថ្មី</div>
+
+                <div class="small-text font-bold">អាសយដ្ឋាន / Address:</div>
+                <div id="label-address" class="data-text">(មិនបានបញ្ជាក់)</div>
             </div>
 
-            <!-- Right Block: Total & Tracking -->
             <div class="info-block right">
-                <div class="small-text mb-0.5 font-bold text-gray-700">កាលបរិច្ឆេទ:</div>
-                <div id="label-date" class="data-text text-black">DD/MM/YYYY</div>
-                
-                <div class="total-box bg-gray-100 text-black">
-                    តម្លៃសរុប: <span id="label-total" class="font-bold">$0</span>
-                </div>
-                
-                <div class="small-text font-bold text-gray-700">ស្ថានភាពបង់ប្រាក់:</div>
-                <div id="label-payment" class="data-text">N/A</div>
-                
-                <div class="small-text font-bold text-gray-700">ដឹកជញ្ជូនដោយ:</div>
+                <div class="small-text font-bold">កាលបរិច្ឆេទ:</div>
+                <div id="label-date" class="data-text">DD/MM/YYYY</div>
+
+                <div class="total-box">តម្លៃសរុប: <span id="label-total">$0.00</span></div>
+
+                <div class="small-text font-bold">ស្ថានភាពបង់ប្រាក់:</div>
+                <div id="label-payment" class="data-text">Unpaid</div>
+
+                <div class="small-text font-bold">ដឹកជញ្ជូនដោយ:</div>
                 <div id="label-shipping" class="data-text">N/A</div>
             </div>
         </div>
-        
-        <!-- FOOTER -->
-        <div class="label-footer">
-             <div class="small-text font-bold text-gray-700">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន! </div>
-        </div>
 
+        <!-- FOOTER -->
+        <div class="label-footer">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន!</div>
     </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const loading = document.getElementById('loading');
-        const printButton = document.getElementById('printButton');
-        const downloadButton = document.getElementById('downloadButton'); // NEW
-        const labelContainer = document.getElementById('label-container');
-        
-        loading.classList.remove('hidden');
+document.addEventListener('DOMContentLoaded', () => {
+    const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
+    if (params.id) {
+        document.getElementById('label-page').textContent = params.page || 'N/A';
+        document.getElementById('label-user').textContent = params.user || 'N/A';
+        document.getElementById('label-order-id').textContent = params.id || 'N/A';
+        document.getElementById('label-name').textContent = params.name || 'N/A';
+        document.getElementById('label-phone').textContent = params.phone || 'N/A';
+        document.getElementById('label-location').textContent = params.location || 'N/A';
+        document.getElementById('label-address').textContent = params.address || '(មិនបានបញ្ជាក់)';
+        document.getElementById('label-total').textContent = params.total ? `$${parseFloat(params.total).toFixed(2)}` : 'N/A';
+        document.getElementById('label-payment').textContent = params.payment || 'Unpaid';
+        document.getElementById('label-shipping').textContent = params.shipping || 'N/A';
 
-        // Function to get query parameters from URL
-        function getQueryParams() {
-            const params = {};
-            const queryString = window.location.search.substring(1);
-            if (!queryString) return params;
-            const pairs = queryString.split('&');
-            for (let i = 0; i < pairs.length; i++) {
-                let pair = pairs[i].split('=');
-                if (pair.length > 1) {
-                     // ប្រើ decodeURIComponent ដើម្បីបកប្រែភាសាខ្មែរ និងតួអក្សរពិសេស
-                     params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1].replace(/\+/g, ' '));
-                }
-            }
-            return params;
-        }
+        const today = new Date();
+        const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        document.getElementById('label-date').textContent = d;
+    }
 
-        // Get data from URL
-        const data = getQueryParams();
-
-        // Check if data is present and populate the label
-        if (Object.keys(data).length > 0 && data.id) {
-            
-            const orderIdForFilename = data.id.replace('ORD-', '') || 'label';
-            
-            // --- UPDATED: ភ្ជាប់ទិន្នន័យទាំងអស់ ---
-            document.getElementById('label-name').textContent = data.name || 'N/A';
-            document.getElementById('label-phone').textContent = data.phone || 'N/A';
-            document.getElementById('label-page').textContent = data.page || 'N/A';
-            document.getElementById('label-user').textContent = data.user || 'N/A';
-            document.getElementById('label-order-id').textContent = orderIdForFilename;
-            document.getElementById('label-location').textContent = data.location || 'N/A';
-            document.getElementById('label-address').textContent = data.address || '(មិនបានបញ្ជាក់)';
-            
-            const total = parseFloat(data.total);
-            document.getElementById('label-total').textContent = isNaN(total) ? 'N/A' : `$${total.toFixed(2)}`;
-            
-            const paymentEl = document.getElementById('label-payment');
-            const paymentStatus = data.payment || 'N/A';
-            paymentEl.textContent = paymentStatus;
-            if (paymentStatus.toLowerCase().includes('paid')) {
-                paymentEl.classList.add('paid');
-            } else {
-                paymentEl.classList.add('unpaid');
-            }
-
-            document.getElementById('label-shipping').textContent = data.shipping || 'N/A';
-            
-            const today = new Date();
-            const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-            document.getElementById('label-date').textContent = dateStr;
-
-
-            loading.classList.add('hidden');
-            
-            // Set up Print Button Listener
-            printButton.addEventListener('click', () => {
-                window.print();
-            });
-            
-            // --- NEW: Download PNG Logic ---
-            downloadButton.addEventListener('click', () => {
-                const originalText = downloadButton.textContent;
-                downloadButton.textContent = '⏳ កំពុងទាញយករូបភាព...';
-                downloadButton.disabled = true;
-
-                html2canvas(labelContainer, {
-                    scale: 3, // 3x resolution for high quality PNG
-                    useCORS: true,
-                    backgroundColor: '#ffffff' // ធានាថាផ្ទៃខាងក្រោយជាពណ៌ស
-                }).then(canvas => {
-                    // បង្កើត link សម្រាប់ទាញយក
-                    const link = document.createElement('a');
-                    link.href = canvas.toDataURL('image/png');
-                    link.download = `label-${orderIdForFilename}.png`; // ប្រើ Order ID ជាឈ្មោះឯកសារ
-                    
-                    // Trigger download
-                    document.body.appendChild(link); // Required for Firefox
-                    link.click();
-                    document.body.removeChild(link);
-
-                    // Reset button
-                    downloadButton.textContent = originalText;
-                    downloadButton.disabled = false;
-                }).catch(err => {
-                    console.error('Error generating PNG:', err);
-                    downloadButton.textContent = '❌ មានបញ្ហា';
-                    // Reset button after 2 seconds on error
-                    setTimeout(() => {
-                         downloadButton.textContent = originalText;
-                         downloadButton.disabled = false;
-                    }, 2000);
-                });
-            });
-
-
-        } else {
-            // Handle case where no data is passed (e.g., user opened the page directly)
-            labelContainer.innerHTML = `
-                <div class="text-center text-red-500 p-4">
-                    <p class="text-lg">❌ គ្មានទិន្នន័យសម្រាប់ព្រីន</p>
-                    <p class="text-sm mt-2">សូមប្រាកដថាអ្នកបានចុចប៊ូតុង "ព្រីន Label" ពី Telegram Bot។</p>
-                </div>
-            `;
-            loading.classList.add('hidden');
-            printButton.classList.add('hidden');
-            downloadButton.classList.add('hidden'); // NEW: លាក់ប៊ូតុង Download ដែរ
-        }
+    document.getElementById('printButton').addEventListener('click', () => {
+        alert("សូមប្រាកដថា Chrome Printer Settings → Scale = 100% និង Margin = None មុនព្រីន!");
+        window.print();
     });
+});
 </script>
+
 </body>
 </html>
-
