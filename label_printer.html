@@ -170,7 +170,7 @@
             
             <!-- NEW: ប៊ូតុងសម្លេង -->
             <button id="speakButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                🔈 ស្តាប់ការណែនាំ
+                🔈 ស្តាប់ការណែនាំ (Print Guide)
             </button>
 
             <button id="printButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
@@ -238,6 +238,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // ប្រើ URLSearchParams ថ្មីដែលងាយស្រួលអានជាង
     const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
     
+    // --- NEW: មុខងារសម្លេង (Speech Synthesis) ដែលអាចប្រើឡើងវិញបាន ---
+    function speakText(textToSpeak, lang = 'km-KH', rate = 0.9) {
+        // ពិនិត្យមើលថា browser គាំទ្រ TTS
+        if ('speechSynthesis' in window) {
+            // បញ្ឈប់សម្លេងចាស់ (ប្រសិនបើមាន)
+            window.speechSynthesis.cancel();
+            
+            // បង្កើត object សម្លេង
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            
+            // កំណត់ភាសាជាខ្មែរ
+            utterance.lang = lang;
+            
+            // កំណត់ល្បឿន និងកម្រិតសម្លេង
+            utterance.pitch = 1; // 1 = default
+            utterance.rate = rate;
+            
+            // ចាប់ផ្តើមអាន
+            window.speechSynthesis.speak(utterance);
+            return true; // ដំណើរការ
+        } else {
+            return false; // មិនដំណើរការ
+        }
+    }
+    
     // ពិនិត្យមើលថា params.id មានពិតប្រាកដ
     if (params.id) {
         document.getElementById('label-page').textContent = decodeURIComponent(params.page || 'N/A');
@@ -257,11 +282,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const today = new Date();
         const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
         document.getElementById('label-date').textContent = d;
+
+        // --- NEW: ចាក់សម្លេងស្វាគមន៍ដោយស្វ័យប្រវត្តិ ---
+        const welcomeText = "សូមពិនិត្យទិន្នន័យ។ បន្ទាប់មក, ចុចប៊ូតុង ព្រីន ឡែប៊ល ពណ៌ខៀវ ដើម្បីបោះពុម្ព។";
+        try {
+            // ប្រើ setTimeout ដើម្បីឱ្យទំព័រមានពេលបន្តិចមុននឹងនិយាយ
+            setTimeout(() => {
+                speakText(welcomeText);
+            }, 500); // 500ms delay
+        } catch (e) {
+            console.warn("មិនអាចចាក់សម្លេងស្វាគមន៍ដោយស្វ័យប្រវត្តិទេ (បញ្ហា Autoplay Policy):", e);
+        }
+
     } else {
         // បើកគ្មាន ID គឺលាក់ Label ហើយបង្ហាញតែ UI
         document.getElementById('label-container').style.display = 'none';
         document.getElementById('printButton').disabled = true;
         document.getElementById('printButton').textContent = '❌ គ្មានទិន្នន័យ';
+        document.getElementById('speakButton').disabled = true; // បិទប៊ូតុងសម្លេងដែរ
     }
 
     // Print button
@@ -283,36 +321,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- NEW: មុខងារសម្លេង (Speech Synthesis) ---
-    function speakInstructions() {
-        // ពិនិត្យមើលថា browser គាំទ្រ TTS
-        if ('speechSynthesis' in window) {
-            // បញ្ឈប់សម្លេងចាស់ (ប្រសិនបើមាន)
-            window.speechSynthesis.cancel();
-            
-            // អត្ថបទដែលត្រូវអាន (ផ្អែកលើ Print Guide)
-            const textToSpeak = "សូមស្វាគមន៍។ សូមធ្វើការកំណត់ Printer ឱ្យបានត្រឹមត្រូវ។ ជ្រើសទំហំក្រដាស Custom 78mm គុណ 50mm។ កំណត់ Scale ទៅ 100% និង Margins ទៅ None។ សូមអរគុណ។";
-            
-            // បង្កើត object សម្លេង
-            const utterance = new SpeechSynthesisUtterance(textToSpeak);
-            
-            // កំណត់ភាសាជាខ្មែរ
-            utterance.lang = 'km-KH';
-            
-            // កំណត់ល្បឿន និងកម្រិតសម្លេង
-            utterance.pitch = 1; // 1 = default
-            utterance.rate = 0.9; // 0.9 = យឺតជាងមុនបន្តិច
-            
-            // ចាប់ផ្តើមអាន
-            window.speechSynthesis.speak(utterance);
-        } else {
-            // ប្រសិនបើ browser មិនគាំទ្រ
+    
+    // ភ្ជាប់ប៊ូតុងសម្លេង (Print Guide) ទៅ Function
+    speakButton.addEventListener('click', () => {
+        const guideText = "សូមស្វាគមន៍។ សូមធ្វើការកំណត់ Printer ឱ្យបានត្រឹមត្រូវ។ ជ្រើសទំហំក្រដាស Custom 78mm គុណ 50mm។ កំណត់ Scale ទៅ 100% និង Margins ទៅ None។ សូមអរគុណ។";
+        if (!speakText(guideText)) {
             alert('សុំអភ័យទោស, browser របស់អ្នកមិនគាំទ្រមុខងារសម្លេងនេះទេ។');
         }
-    }
-    
-    // ភ្ជាប់ប៊ូតុងសម្លេងទៅ Function
-    speakButton.addEventListener('click', speakInstructions);
+    });
 
 });
 </script>
