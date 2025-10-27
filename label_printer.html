@@ -6,7 +6,7 @@
     <!-- Import Font Kantumruy Pro -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;700&display.swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -302,20 +302,81 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioGuide = document.getElementById('audioGuide');
     const audioSuccess = document.getElementById('audioSuccess');
 
-    // Function សម្រាប់ចាក់សម្លេង (ដោះស្រាយបញ្ហា Autoplay)
-    function playAudio(audioElement) {
-        if (audioElement) {
-            audioElement.currentTime = 0;
-            const promise = audioElement.play();
+    // *** NEW: Audio Management Logic ***
+    let currentAudio = null;      // សម្លេងដែលកំពុងលឺ
+    let interruptedAudio = null;  // សម្លេងដែលត្រូវបានផ្អាក
+
+    // Function ពេលសម្លេងចាក់ចប់
+    function onAudioEnded() {
+        // ពិនិត្យមើលថាតើមានសម្លេងត្រូវបានផ្អាកដែរឬទេ
+        if (interruptedAudio) {
+            // បើមាន, ចាក់សម្លេងដែលបានផ្អាកនោះបន្ត
+            currentAudio = interruptedAudio;
+            interruptedAudio = null;
+            
+            const promise = currentAudio.play(); // នេះជាការ Resume (បន្ត)
             if (promise !== undefined) {
-                promise.catch(error => {
-                    // Autoplay ត្រូវបាន Block, មិនបាច់ធ្វើអ្វីទេ
-                }).then(() => {
-                    // Autoplay ជោគជ័យ
-                });
+                promise.catch(error => {}).then(() => {});
             }
+            // ដាក់ Listener ត្រឡប់ទៅវិញ ក្រែងលNó ត្រូវបានផ្អាកម្តងទៀត
+            currentAudio.removeEventListener('ended', onAudioEnded);
+            currentAudio.addEventListener('ended', onAudioEnded, { once: true });
+        } else {
+            // បើគ្មានសម្លេងត្រូវបន្ត (resume), គឺនៅទំនេរ
+            currentAudio = null;
         }
     }
+
+    // Function សម្រាប់ចាក់សម្លេង (គ្រប់គ្រងការជាន់គ្នា)
+    function playAudio(audioElement) {
+        if (!audioElement) return;
+
+        // 1. ពិនិត្យមើលថាតើសម្លេងផ្សេង កំពុងលឺឬអត់
+        if (currentAudio && currentAudio !== audioElement && !currentAudio.paused) {
+            // បាទ, សម្លេងផ្សេងកំពុងលឺ. ផ្អាកវា.
+            currentAudio.pause();
+            interruptedAudio = currentAudio; // ចងចាំសម្លេងដែលបានផ្អាក
+        } else if (!currentAudio || currentAudio !== audioElement) {
+            // គ្មានសម្លេងកំពុងលឺ, ឬជាការចុចចាក់សម្លេងដដែលឡើងវិញ
+            interruptedAudio = null; // មិនមានអ្វីត្រូវបន្ត (resume) ទេ
+        }
+        // បើ currentAudio == audioElement ហើយកំពុងលឺ, មិនបាច់ធ្វើអ្វីទេ (ទុកឱ្យវាលឺបន្ត)
+
+        // 2. ចាក់សម្លេងថ្មី (ឬចាក់ឡើងវិញ)
+        currentAudio = audioElement;
+        if (currentAudio.currentTime > 0 && currentAudio === interruptedAudio) {
+             // នេះជាករណី resume, មិនបាច់ reset currentTime
+        } else {
+            currentAudio.currentTime = 0; // ចាក់ឡើងវិញពីដើម
+        }
+
+        const promise = currentAudio.play();
+        if (promise !== undefined) {
+            promise.catch(error => {
+                // Autoplay ត្រូវបាន Block
+            }).then(() => {
+                // Autoplay ជោគជ័យ
+            });
+        }
+
+        // 3. ដាក់ Listener 'ended' 
+        currentAudio.removeEventListener('ended', onAudioEnded); // ដក Listener ចាស់ចេញ (បើមាន)
+        currentAudio.addEventListener('ended', onAudioEnded, { once: true }); // បន្ថែម Listener ថ្មី
+    }
+
+    // Function សម្រាប់បញ្ឈប់សម្លេងទាំងអស់ (ពេលបិទ Modal)
+    function stopAllAudio() {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        if (interruptedAudio) {
+            interruptedAudio.pause();
+            interruptedAudio = null;
+        }
+    }
+    // *** END: Audio Management Logic ***
+
 
     if (params.id) {
         document.getElementById('label-page').textContent = params.page || 'N/A';
@@ -333,18 +394,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
         document.getElementById('label-date').textContent = d;
 
-        // *** NEW: បានកែប្រែ Logic សម្លេងស្វាគមន៍ ***
-        // 1. បង្កើត Function សម្រាប់ចាក់សម្លេងស្វាគមន៍
+        // Logic សម្លេងស្វាគមន៍ (នៅដដែល)
         const playWelcomeOnFirstInteraction = () => {
             playAudio(audioWelcome);
-            // មិនបាច់ដក Listener ចេញទេ ព្រោះ { once: true } នឹងដកវាដោយស្វ័យប្រវត្តិ
         };
-
-        // 2. បន្ថែម Listener សម្រាប់ 'click' ឬ 'touchstart' ដំបូង
-        // វានឹងដំណើរការតែម្តងគត់
         document.body.addEventListener('click', playWelcomeOnFirstInteraction, { once: true });
         document.body.addEventListener('touchstart', playWelcomeOnFirstInteraction, { once: true });
-
 
     } else {
         // បើគ្មានទិន្នន័យ មិនបាច់ចាក់សម្លេងស្វាគមន៍
@@ -352,13 +407,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Print button
     document.getElementById('printButton').addEventListener('click', () => {
-        // បើកផ្ទាំង Print ភ្លាមៗ
         window.print();
-        
-        // ຫຼັງຈາກបិទផ្ទាំង Print, រង់ចាំ 5 វិនាទី សឹមចាក់សម្លេង "ជោគជ័យ"
         setTimeout(() => {
             playAudio(audioSuccess);
-        }, 5000); // 5000ms = 5 វិនាទី
+        }, 5000); 
     });
 
     // Guide modal
@@ -371,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
         guideModal.style.display = 'flex';
     });
     closeGuide.addEventListener('click', () => {
-        audioGuide.pause(); // បិទសម្លេងបើ Modal ត្រូវបានបិទ
+        stopAllAudio(); // *** NEW: ប្រើ Function ថ្មីដើម្បីបញ្ឈប់សម្លេងទាំងអស់
         guideModal.style.display = 'none';
     });
 
@@ -383,24 +435,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const customHeightInput = document.getElementById('customHeight');
     const labelContainer = document.getElementById('label-container');
 
-    const standardRatio = 78 / 50; // សមាមាត្រដើម
-    let isUpdating = false; // សម្រាប់ការពារ infinite loop
+    const standardRatio = 78 / 50; 
+    let isUpdating = false; 
 
-    // Function សម្រាប់អាប់ដេតទំហំ
     function updateLabelSize(width, height) {
         if (isUpdating) return;
         
-        // អាប់ដេត CSS Variables (សម្រាប់ Print)
         rootStyle.setProperty('--page-width', `${width}mm`);
         rootStyle.setProperty('--page-height', `${height}mm`);
 
-        // អាប់ដេតទំហំ Label នៅលើអេក្រង់ (px)
         // 1mm = 3.7795275591 px
         labelContainer.style.width = `${width * 3.7795275591}px`;
         labelContainer.style.height = `${height * 3.7795275591}px`;
     }
 
-    // គ្រប់គ្រងការជ្រើសរើស Radio
     sizeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             if (e.target.value === 'standard') {
@@ -410,12 +458,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateLabelSize(78, 50);
             } else {
                 customInputsDiv.classList.remove('hidden');
-                // មិនបាច់អាប់ដេតភ្លាមៗ រង់ចាំការវាយបញ្ចូល
             }
         });
     });
 
-    // គ្រប់គ្រងការគណនា Custom Width
     customWidthInput.addEventListener('input', (e) => {
         isUpdating = true;
         const width = parseFloat(e.target.value) || 0;
@@ -425,7 +471,6 @@ document.addEventListener('DOMContentLoaded', () => {
         isUpdating = false;
     });
 
-    // គ្រប់គ្រងការគណនា Custom Height
     customHeightInput.addEventListener('input', (e) => {
         isUpdating = true;
         const height = parseFloat(e.target.value) || 0;
@@ -436,8 +481,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ------------------- Margin Logic -------------------
-    // *** NEW: បានកែប្រែ Logic ផ្នែកនេះ ***
-
     const marginInputs = [
         { id: 'marginTop', key: '--page-margin-top' },
         { id: 'marginRight', key: '--page-margin-right' },
@@ -445,30 +488,21 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'marginLeft', key: '--page-margin-left' }
     ];
 
-    // 1. ផ្ទុក (Load) និង អនុវត្ត (Apply) Margins ដែលបានរក្សាទុក (Saved Margins) នៅពេលបើកទំព័រ
     marginInputs.forEach(margin => {
-        // ប្រើ localStorage ដើម្បីទាញយកតម្លៃដែលបានរក្សាទុក
         const savedValue = localStorage.getItem(margin.key);
         
         if (savedValue !== null) {
             const valueInMm = `${savedValue || 0}mm`;
-            // អនុវត្តតម្លៃទៅ CSS Variable (សម្រាប់ Print)
             rootStyle.setProperty(margin.key, valueInMm);
-            // អនុវត្តតម្លៃទៅช่อง Input (សម្រាប់បង្ហាញ)
             document.getElementById(margin.id).value = savedValue || 0;
         }
     });
 
-    // 2. បន្ថែម Event Listeners ដើម្បីរក្សាទុក (Save) ការកំណត់ នៅពេលមានការផ្លាស់ប្តូរ
     marginInputs.forEach(margin => {
         document.getElementById(margin.id).addEventListener('input', (e) => {
             const value = e.target.value || 0;
             const valueInMm = `${value}mm`;
-            
-            // អនុវត្តតម្លៃទៅ CSS Variable (សម្រាប់ Print)
             rootStyle.setProperty(margin.key, valueInMm);
-            
-            // រក្សាទុក (Save) តម្លៃទៅក្នុង localStorage
             localStorage.setItem(margin.key, value);
         });
     });
