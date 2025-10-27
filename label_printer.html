@@ -245,15 +245,24 @@
             </div>
         </div>
 
-        <!-- *** NEW: Design Mode Toggle *** -->
+        <!-- *** Design Mode Toggle *** -->
         <div class="border-b border-gray-200 pb-4 mb-4">
             <h2 class="text-md font-bold text-gray-700 mb-3 text-left">โหมดออกแบบ (Design Mode)</h2>
             <label class="flex items-center cursor-pointer">
                 <input type="checkbox" id="designModeToggle" class="form-checkbox h-5 w-5 text-blue-600">
-                <span class="ml-2 text-sm text-gray-700">เปิดใช้งานការកែសម្រួល (Enable Editing)</span>
+                <!-- *** CHANGED (Request 1) *** -->
+                <span class="ml-2 text-sm text-gray-700">កែរចនាបទ Label</span>
             </label>
         </div>
         <!-- *** END: Design Mode Toggle *** -->
+
+        <!-- *** NEW (Request 2) *** -->
+        <div class="border-b border-gray-200 pb-4 mb-4">
+            <button id="resetDesignButton" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                Reset រចនាបទ ទៅដូចដើម
+            </button>
+        </div>
+        <!-- *** END: Reset Button *** -->
 
 
         <div class="flex flex-col gap-2">
@@ -512,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // ------------------- *** NEW: Design Mode Logic *** -------------------
+    // ------------------- *** Design Mode Logic *** -------------------
     const designModeToggle = document.getElementById('designModeToggle');
     const styleEditor = document.getElementById('styleEditor');
     const editorTitle = document.getElementById('editorTitle');
@@ -520,6 +529,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeEditorBtn = document.getElementById('closeEditor');
     const editableElements = document.querySelectorAll('.editable-element');
     const STYLES_KEY = 'labelStyles';
+
+    // *** NEW (Request 2): Reset Button Listener ***
+    const resetDesignButton = document.getElementById('resetDesignButton');
+    resetDesignButton.addEventListener('click', () => {
+        localStorage.removeItem(STYLES_KEY);
+        window.location.reload();
+    });
 
     let isDesignMode = false;
     let selectedElement = null;
@@ -562,8 +578,9 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(STYLES_KEY, JSON.stringify(savedStyles));
     }
 
-    // 3. Convert from Flex to Absolute (Run ONCE)
+    // 3. Convert from Flex to Absolute (Run ONCE when first edit occurs)
     function convertToAbsolute() {
+        // *** MODIFIED (Request 3): Check if already converted ***
         if (localStorage.getItem(STYLES_KEY)) return; // Already converted
 
         labelContainer.style.display = 'block'; // Override flex
@@ -599,7 +616,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const rect = element.getBoundingClientRect();
         styleEditor.style.display = 'block';
-        styleEditor.style.top = `${window.scrollY + rect.top - styleEditor.offsetHeight - 10}px`;
+        // Position editor above the element
+        let editorTop = window.scrollY + rect.top - styleEditor.offsetHeight - 10;
+        if (editorTop < window.scrollY + 10) { // If it goes off-screen top
+            editorTop = window.scrollY + rect.bottom + 10; // Position below
+        }
+        styleEditor.style.top = `${editorTop}px`;
         styleEditor.style.left = `${window.scrollX + rect.left}px`;
 
         editorTitle.textContent = `Edit: #${element.id}`;
@@ -656,17 +678,25 @@ document.addEventListener('DOMContentLoaded', () => {
         isDesignMode = e.target.checked;
         if (isDesignMode) {
             labelContainer.classList.add('design-mode-active');
-            convertToAbsolute(); // Convert layout if not already done
+            
+            // *** REMOVED convertToAbsolute() call (Request 3) ***
 
             editableElements.forEach(el => {
-                el.addEventListener('mousedown', (ev) => {
+                const handleEditStart = (ev) => {
+                    if (!isDesignMode) return;
+
+                    // *** NEW LOGIC (Request 3) ***
+                    // Check if this is the first edit. If so, convert layout.
+                    if (!localStorage.getItem(STYLES_KEY)) {
+                        convertToAbsolute();
+                    }
+                    
                     showEditor(el);
                     onDragStart(ev);
-                });
-                el.addEventListener('touchstart', (ev) => {
-                    showEditor(el);
-                    onDragStart(ev);
-                }, { passive: false });
+                };
+
+                el.addEventListener('mousedown', handleEditStart);
+                el.addEventListener('touchstart', handleEditStart, { passive: false });
             });
             
             window.addEventListener('mousemove', onDrag);
@@ -678,9 +708,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             labelContainer.classList.remove('design-mode-active');
             hideEditor();
-            // Remove all listeners (this is simplified, a more robust solution would track them)
-            // For simplicity, we just rely on the isDesignMode flag
-            // Reloading is the safest way to "disable"
             window.location.reload(); 
         }
     });
@@ -689,6 +716,12 @@ document.addEventListener('DOMContentLoaded', () => {
     closeEditorBtn.addEventListener('click', hideEditor);
     editorFontSize.addEventListener('input', (e) => {
         if (selectedElement) {
+            // *** NEW LOGIC (Request 3) ***
+            // Check if this is the first edit. If so, convert layout.
+            if (!localStorage.getItem(STYLES_KEY)) {
+                convertToAbsolute();
+            }
+            
             const newSize = parseFloat(e.target.value) || 10;
             selectedElement.style.fontSize = `${newSize}pt`;
             saveStyle(selectedElement);
