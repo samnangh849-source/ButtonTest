@@ -11,6 +11,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
+        /* NEW: CSS Variables for dynamic size */
+        :root {
+            --page-width: 295px;  /* 78mm */
+            --page-height: 189px; /* 50mm */
+        }
+
         html, body {
             box-sizing: border-box;
             /* NEW: Apply Kantumruy Pro Font and set base color to black */
@@ -21,8 +27,9 @@
         *, *:before, *:after { box-sizing: inherit; }
 
         #label-container {
-            width: 295px;    /* 78mm */
-            height: 189px;   /* 50mm */
+            /* UPDATED: Use CSS Variables */
+            width: var(--page-width);
+            height: var(--page-height);
             background-color: white;
             margin: 0 auto;
             padding: 1mm;
@@ -110,9 +117,16 @@
         }
 
         @media print {
+            /* NEW: Use CSS Variables */
+            @page {
+                size: var(--page-width) var(--page-height);
+                margin: 0;
+            }
+
             html, body {
-                width: 78mm;
-                height: 50mm;
+                /* UPDATED: Use CSS Variables */
+                width: var(--page-width);
+                height: var(--page-height);
                 margin: 0 !important;
                 padding: 0 !important;
                 background: none !important;
@@ -120,8 +134,9 @@
             }
 
             #label-container {
-                width: 295px;
-                height: 189px;
+                /* UPDATED: Use CSS Variables */
+                width: var(--page-width);
+                height: var(--page-height);
                 margin: 0 !important;
                 padding: 1mm !important;
                 border: none !important;
@@ -154,6 +169,12 @@
             width: 90%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
+
+        /* NEW: Helper class for custom inputs */
+        #custom-size-inputs.hidden,
+        #voice-alert.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -161,14 +182,13 @@
     <!-- UI មុនព្រីន -->
     <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6 text-center">
         <h1 class="text-xl font-bold text-gray-800 mb-2">ទម្រង់ព្រីន Label</h1>
-        <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពម្ព។ ទំហំ (78mm x 50mm)</p>
+        <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពុម្ព។</p>
 
         <div class="flex flex-col gap-2">
             <button id="guideButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
                 ℹ️ ព័ត៌មានបោះពុម្ព (Print Guide)
             </button>
             
-            <!-- NEW: ប៊ូតុងសម្លេង -->
             <button id="speakButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
                 🔈 ស្តាប់ការណែនាំ (Print Guide)
             </button>
@@ -177,6 +197,39 @@
                 ✅ Print Label នេះ
             </button>
         </div>
+
+        <!-- NEW: Voice Pack Alert Box -->
+        <div id="voice-alert" class="hidden p-3 mt-2 rounded-md bg-yellow-100 border border-yellow-300 text-left">
+            <p class="text-sm font-semibold text-yellow-800">⚠️ រកមិនឃើញសម្លេងភាសាខ្មែរ</p>
+            <p class="text-xs text-yellow-700 mt-1">
+                ដើម្បីឱ្យមុខងារសម្លេងដំណើរការ, សូមដំឡើង "Khmer Voice Pack" នៅក្នុង Settings របស់កុំព្យូទ័រ ឬទូរស័ព្ទរបស់អ្នក។
+            </p>
+        </div>
+
+
+        <!-- NEW: ជម្រើសទំហំ Label -->
+        <div class="mt-4 pt-4 border-t border-gray-200 text-left">
+            <h2 class="text-md font-semibold text-gray-700 mb-2 text-center">ជម្រើសទំហំ (រក្សាសមាមាត្រ)</h2>
+            <div class="flex items-center mb-2">
+                <input id="sizeStandard" type="radio" name="labelSize" value="standard" class="w-4 h-4" checked>
+                <label for="sizeStandard" class="ml-2 text-sm font-medium text-gray-900">Standard (78 x 50 mm)</label>
+            </div>
+            <div class="flex items-center">
+                <input id="sizeCustom" type="radio" name="labelSize" value="custom" class="w-4 h-4">
+                <label for="sizeCustom" class="ml-2 text-sm font-medium text-gray-900">Customize:</label>
+            </div>
+            <div id="custom-size-inputs" class="hidden mt-2 flex gap-2 justify-center">
+                <div>
+                    <label for="customWidth" class="block text-xs font-medium text-gray-700">ទទឹង (mm)</label>
+                    <input type="number" id="customWidth" value="78" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm p-2" style="max-width: 100px;">
+                </div>
+                <div>
+                    <label for="customHeight" class="block text-xs font-medium text-gray-700">បណ្ដោយ (mm)</label>
+                    <input type="number" id="customHeight" value="50" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm p-2" style="max-width: 100px;">
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Modal (Print Guide) -->
@@ -185,7 +238,7 @@
             <h2 class="text-lg font-bold mb-2 text-gray-800">ការកំណត់ Printer ត្រឹមត្រូវ</h2>
             <ul class="list-disc pl-5 text-sm text-gray-700 mb-4 text-left">
                 <li>ជ្រើស <strong>Destination:</strong> EML-200L (2 inch)</li>
-                <li><strong>Paper size:</strong> Custom 78mm × 50mm</li>
+                <li><strong>Paper size:</strong> Custom 78mm × 50mm (ឬតាមទំហំ Custom)</li>
                 <li><strong>Scale:</strong> 100% (Actual Size)</li>
                 <li><strong>Margins:</strong> None</li>
                 <li><strong>Background graphics:</strong> ON</li>
@@ -252,48 +305,114 @@ document.addEventListener('DOMContentLoaded', () => {
         const voices = window.speechSynthesis.getVoices();
         const khmerVoice = voices.find(voice => voice.lang === 'km-KH');
         
+        // NEW: ស្វែងរក Alert Box
+        const voiceAlert = document.getElementById('voice-alert');
+        
         if (khmerVoice) {
             // ប្រសិនបើរកឃើញ, ប្រើសម្លេងនោះ (នេះគឺត្រឹមត្រូវបំផុត)
             utterance.voice = khmerVoice;
+            utterance.pitch = 1;
+            utterance.rate = rate;
+            
+            // លាក់ Alert ប្រសិនបើវាត្រូវបានបង្ហាញពីមុន
+            voiceAlert.classList.add('hidden');
+            
+            window.speechSynthesis.speak(utterance);
+            return true; // ដំណើរការ
         } else {
-            // បើមិនឃើញ, ប្រើ lang ជា fallback (អាចនឹងមិនដំណើរការ)
-            utterance.lang = lang;
+            // បើមិនឃើញ, បង្ហាញ Alert Box
+            voiceAlert.classList.remove('hidden');
             console.warn("មិនអាចរកសម្លេង 'km-KH' បានទេ។ Browser អាចនឹងប្រើសម្លេង Default។");
+            return false; // មិនដំណើរការ
         }
         // --- ចប់ផ្នែកកែសម្រួល ---
-        
-        utterance.pitch = 1;
-        utterance.rate = rate;
-        
-        window.speechSynthesis.speak(utterance);
-        return true; // ដំណើរការ
     }
     
     // --- NEW: ព្យាយាមផ្ទុក Voices ទុកជាមុន ---
-    // ពេលខ្លះ getVoices() គឺទទេ (empty) ពេល page load
-    // នេះជួយជំរុញឱ្យវាផ្ទុក
     if ('speechSynthesis' in window && window.speechSynthesis.onvoiceschanged !== undefined) {
          window.speechSynthesis.onvoiceschanged = () => {
-            // គ្រាន់តែហៅវាដើម្បីឱ្យប្រាកដថា list ត្រូវបានផ្ទុក
             window.speechSynthesis.getVoices();
          };
     }
     
+    // --- NEW: Custom Size UI Elements ---
+    const sizeStandard = document.getElementById('sizeStandard');
+    const sizeCustom = document.getElementById('sizeCustom');
+    const customSizeInputs = document.getElementById('custom-size-inputs');
+    const customWidthInput = document.getElementById('customWidth');
+    const customHeightInput = document.getElementById('customHeight');
+    
+    // Pixel per MM (approx @ 96 DPI)
+    const PX_PER_MM = 3.7795275591; 
+    const STANDARD_WIDTH_PX = 78 * PX_PER_MM;
+    const STANDARD_HEIGHT_PX = 50 * PX_PER_MM;
+    const ASPECT_RATIO = STANDARD_WIDTH_PX / STANDARD_HEIGHT_PX;
+    let isUpdating = false; // Flag to prevent infinite loop
+
+    // --- NEW: Function to update label size ---
+    function updateLabelSize(widthPx, heightPx) {
+        document.documentElement.style.setProperty('--page-width', `${widthPx}px`);
+        document.documentElement.style.setProperty('--page-height', `${heightPx}px`);
+    }
+
+    // --- NEW: Event Listeners for Size Selection ---
+    sizeStandard.addEventListener('change', () => {
+        if (sizeStandard.checked) {
+            customSizeInputs.classList.add('hidden');
+            updateLabelSize(STANDARD_WIDTH_PX, STANDARD_HEIGHT_PX); // Reset to standard
+            customWidthInput.value = 78;
+            customHeightInput.value = 50;
+        }
+    });
+
+    sizeCustom.addEventListener('change', () => {
+        if (sizeCustom.checked) {
+            customSizeInputs.classList.remove('hidden');
+        }
+    });
+
+    customWidthInput.addEventListener('input', () => {
+        if (isUpdating) return;
+        isUpdating = true;
+        
+        const widthMm = parseFloat(customWidthInput.value) || 0;
+        const heightMm = widthMm / ASPECT_RATIO;
+        customHeightInput.value = heightMm.toFixed(2);
+        
+        updateLabelSize(widthMm * PX_PER_MM, heightMm * PX_PER_MM);
+        
+        isUpdating = false;
+    });
+
+    customHeightInput.addEventListener('input', () => {
+        if (isUpdating) return;
+        isUpdating = true;
+        
+        const heightMm = parseFloat(customHeightInput.value) || 0;
+        const widthMm = heightMm * ASPECT_RATIO;
+        customWidthInput.value = widthMm.toFixed(2);
+        
+        updateLabelSize(widthMm * PX_PER_MM, heightMm * PX_PER_MM);
+        
+        isUpdating = false;
+    });
+
+    
     // ពិនិត្យមើលថា params.id មានពិតប្រាកដ
     if (params.id) {
-        document.getElementById('label-page').textContent = decodeURIComponent(params.page || 'N/A');
-        document.getElementById('label-user').textContent = decodeURIComponent(params.user || 'N/A');
-        document.getElementById('label-order-id').textContent = decodeURIComponent(params.id || 'N/A');
-        document.getElementById('label-name').textContent = decodeURIComponent(params.name || 'N/A');
-        document.getElementById('label-phone').textContent = decodeURIComponent(params.phone || 'N/A');
-        document.getElementById('label-location').textContent = decodeURIComponent(params.location || 'N/A');
+        document.getElementById('label-page').textContent = decodeURIComponent(params.page || 'NA');
+        document.getElementById('label-user').textContent = decodeURIComponent(params.user || 'NA');
+        document.getElementById('label-order-id').textContent = decodeURIComponent(params.id || 'NA');
+        document.getElementById('label-name').textContent = decodeURIComponent(params.name || 'NA');
+        document.getElementById('label-phone').textContent = decodeURIComponent(params.phone || 'NA');
+        document.getElementById('label-location').textContent = decodeURIComponent(params.location || 'NA');
         document.getElementById('label-address').textContent = decodeURIComponent(params.address || '(មិនបានបញ្ជាក់)');
         
         const total = parseFloat(params.total);
-        document.getElementById('label-total').textContent = !isNaN(total) ? `$${total.toFixed(2)}` : 'N/A';
+        document.getElementById('label-total').textContent = !isNaN(total) ? `$${total.toFixed(2)}` : 'NA';
         
         document.getElementById('label-payment').textContent = decodeURIComponent(params.payment || 'Unpaid');
-        document.getElementById('label-shipping').textContent = decodeURIComponent(params.shipping || 'N/A');
+        document.getElementById('label-shipping').textContent = decodeURIComponent(params.shipping || 'NA');
 
         const today = new Date();
         const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
@@ -341,9 +460,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ភ្ជាប់ប៊ូតុងសម្លេង (Print Guide) ទៅ Function
     speakButton.addEventListener('click', () => {
         const guideText = "សូមស្វាគមន៍។ សូមធ្វើការកំណត់ Printer ឱ្យបានត្រឹមត្រូវ។ ជ្រើសទំហំក្រដាស Custom 78mm គុណ 50mm។ កំណត់ Scale ទៅ 100% និង Margins ទៅ None។ សូមអរគុណ។";
-        if (!speakText(guideText)) {
-            alert('សុំអភ័យទោស, browser របស់អ្នកមិនគាំទ្រមុខងារសម្លេងនេះទេ។');
-        }
+        // UPDATED: មិនចាំបាច់ប្រើ if ទេ ព្រោះ speakText នឹងបង្ហាញ Alert ដោយខ្លួនឯង
+        speakText(guideText);
     });
 
 });
