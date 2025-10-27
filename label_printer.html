@@ -333,8 +333,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
         document.getElementById('label-date').textContent = d;
 
-        // ចាក់សម្លេងស្វាគមន៍ភ្លាមៗ
-        playAudio(audioWelcome);
+        // *** NEW: បានកែប្រែ Logic សម្លេងស្វាគមន៍ ***
+        // 1. បង្កើត Function សម្រាប់ចាក់សម្លេងស្វាគមន៍
+        const playWelcomeOnFirstInteraction = () => {
+            playAudio(audioWelcome);
+            // មិនបាច់ដក Listener ចេញទេ ព្រោះ { once: true } នឹងដកវាដោយស្វ័យប្រវត្តិ
+        };
+
+        // 2. បន្ថែម Listener សម្រាប់ 'click' ឬ 'touchstart' ដំបូង
+        // វានឹងដំណើរការតែម្តងគត់
+        document.body.addEventListener('click', playWelcomeOnFirstInteraction, { once: true });
+        document.body.addEventListener('touchstart', playWelcomeOnFirstInteraction, { once: true });
+
 
     } else {
         // បើគ្មានទិន្នន័យ មិនបាច់ចាក់សម្លេងស្វាគមន៍
@@ -426,17 +436,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ------------------- Margin Logic -------------------
-    document.getElementById('marginTop').addEventListener('input', (e) => {
-        rootStyle.setProperty('--page-margin-top', `${e.target.value || 0}mm`);
+    // *** NEW: បានកែប្រែ Logic ផ្នែកនេះ ***
+
+    const marginInputs = [
+        { id: 'marginTop', key: '--page-margin-top' },
+        { id: 'marginRight', key: '--page-margin-right' },
+        { id: 'marginBottom', key: '--page-margin-bottom' },
+        { id: 'marginLeft', key: '--page-margin-left' }
+    ];
+
+    // 1. ផ្ទុក (Load) និង អនុវត្ត (Apply) Margins ដែលបានរក្សាទុក (Saved Margins) នៅពេលបើកទំព័រ
+    marginInputs.forEach(margin => {
+        // ប្រើ localStorage ដើម្បីទាញយកតម្លៃដែលបានរក្សាទុក
+        const savedValue = localStorage.getItem(margin.key);
+        
+        if (savedValue !== null) {
+            const valueInMm = `${savedValue || 0}mm`;
+            // អនុវត្តតម្លៃទៅ CSS Variable (សម្រាប់ Print)
+            rootStyle.setProperty(margin.key, valueInMm);
+            // អនុវត្តតម្លៃទៅช่อง Input (សម្រាប់បង្ហាញ)
+            document.getElementById(margin.id).value = savedValue || 0;
+        }
     });
-    document.getElementById('marginRight').addEventListener('input', (e) => {
-        rootStyle.setProperty('--page-margin-right', `${e.target.value || 0}mm`);
-    });
-    document.getElementById('marginBottom').addEventListener('input', (e) => {
-        rootStyle.setProperty('--page-margin-bottom', `${e.target.value || 0}mm`);
-    });
-    document.getElementById('marginLeft').addEventListener('input', (e) => {
-        rootStyle.setProperty('--page-margin-left', `${e.target.value || 0}mm`);
+
+    // 2. បន្ថែម Event Listeners ដើម្បីរក្សាទុក (Save) ការកំណត់ នៅពេលមានការផ្លាស់ប្តូរ
+    marginInputs.forEach(margin => {
+        document.getElementById(margin.id).addEventListener('input', (e) => {
+            const value = e.target.value || 0;
+            const valueInMm = `${value}mm`;
+            
+            // អនុវត្តតម្លៃទៅ CSS Variable (សម្រាប់ Print)
+            rootStyle.setProperty(margin.key, valueInMm);
+            
+            // រក្សាទុក (Save) តម្លៃទៅក្នុង localStorage
+            localStorage.setItem(margin.key, value);
+        });
     });
 });
 </script>
