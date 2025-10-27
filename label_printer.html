@@ -333,8 +333,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
         document.getElementById('label-date').textContent = d;
 
-        // ចាក់សម្លេងស្វាគមន៍
-        setTimeout(() => playAudio(audioWelcome), 500);
+        // ចាក់សម្លេងស្វាគមន៍ភ្លាមៗ
+        playAudio(audioWelcome);
 
     } else {
         // បើគ្មានទិន្នន័យ មិនបាច់ចាក់សម្លេងស្វាគមន៍
@@ -342,9 +342,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Print button
     document.getElementById('printButton').addEventListener('click', () => {
-        playAudio(audioSuccess);
-        // ឱ្យសម្លេងលឺបន្តិចសិន មុននឹងបើកផ្ទាំង Print
-        setTimeout(() => window.print(), 300);
+        // បើកផ្ទាំង Print ភ្លាមៗ
+        window.print();
+        
+        // ຫຼັງຈາກបិទផ្ទាំង Print, រង់ចាំ 5 វិនាទី សឹមចាក់សម្លេង "ជោគជ័យ"
+        setTimeout(() => {
+            playAudio(audioSuccess);
+        }, 5000); // 5000ms = 5 វិនាទី
     });
 
     // Guide modal
