@@ -176,7 +176,7 @@
             z-index: 10;
         }
         
-        /* *** CHANGED (Request 2): Style Editor Position *** */
+        /* *** Style Editor Position *** */
         #styleEditor {
             position: fixed;
             z-index: 1001;
@@ -256,7 +256,8 @@
 
         <!-- *** Design Mode Toggle *** -->
         <div class="border-b border-gray-200 pb-4 mb-4">
-            <h2 class="text-md font-bold text-gray-700 mb-3 text-left">โหมดออกแบบ (Design Mode)</h2>
+            <!-- *** REMOVED (Request 1) *** -->
+            <!-- <h2 class="text-md font-bold text-gray-700 mb-3 text-left">โหมดออกแบบ (Design Mode)</h2> -->
             <label class="flex items-center cursor-pointer">
                 <input type="checkbox" id="designModeToggle" class="form-checkbox h-5 w-5 text-blue-600">
                 <span class="ml-2 text-sm text-gray-700">កែរចនាបទ Label</span>
@@ -677,39 +678,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 6. Main Toggle Logic
+    // *** MODIFIED (Request 2): Created separate handlers to add/remove ***
+    function handleDragMove(e) {
+        onDrag(e);
+    }
+    function handleDragEnd(e) {
+        onDragEnd(e);
+    }
+    function addGlobalListeners() {
+        window.addEventListener('mousemove', handleDragMove);
+        window.addEventListener('touchmove', handleDragMove, { passive: false });
+        window.addEventListener('mouseup', handleDragEnd);
+        window.addEventListener('touchend', handleDragEnd);
+    }
+    function removeGlobalListeners() {
+        window.removeEventListener('mousemove', handleDragMove);
+        window.removeEventListener('touchmove', handleDragMove, { passive: false });
+        window.removeEventListener('mouseup', handleDragEnd);
+        window.removeEventListener('touchend', handleDragEnd);
+    }
+
+    editableElements.forEach(el => {
+        const handleEditStart = (ev) => {
+            if (!isDesignMode) return;
+            
+            if (!localStorage.getItem(STYLES_KEY)) {
+                convertToAbsolute();
+            }
+            
+            showEditor(el);
+            onDragStart(ev);
+        };
+        el.addEventListener('mousedown', handleEditStart);
+        el.addEventListener('touchstart', handleEditStart, { passive: false });
+    });
+
+
     designModeToggle.addEventListener('change', (e) => {
         isDesignMode = e.target.checked;
         if (isDesignMode) {
             labelContainer.classList.add('design-mode-active');
-            
-            editableElements.forEach(el => {
-                const handleEditStart = (ev) => {
-                    if (!isDesignMode) return;
-                    
-                    // *** MODIFIED (Request 1) ***
-                    // Check if this is the first edit. If so, convert layout.
-                    if (!localStorage.getItem(STYLES_KEY)) {
-                        convertToAbsolute();
-                    }
-                    
-                    showEditor(el);
-                    onDragStart(ev);
-                };
-
-                el.addEventListener('mousedown', handleEditStart);
-                el.addEventListener('touchstart', handleEditStart, { passive: false });
-            });
-            
-            window.addEventListener('mousemove', onDrag);
-            window.addEventListener('touchmove', onDrag, { passive: false });
-            
-            window.addEventListener('mouseup', onDragEnd);
-            window.addEventListener('touchend', onDragEnd);
-
+            addGlobalListeners();
         } else {
+            // *** MODIFIED (Request 2): No refresh ***
             labelContainer.classList.remove('design-mode-active');
             hideEditor();
-            window.location.reload(); 
+            removeGlobalListeners();
+            // We set isDesignMode = false, so clicking elements won't trigger edits.
         }
     });
 
@@ -717,8 +732,6 @@ document.addEventListener('DOMContentLoaded', () => {
     closeEditorBtn.addEventListener('click', hideEditor);
     editorFontSize.addEventListener('input', (e) => {
         if (selectedElement) {
-            // *** MODIFIED (Request 1) ***
-            // Check if this is the first edit. If so, convert layout.
             if (!localStorage.getItem(STYLES_KEY)) {
                 convertToAbsolute();
             }
