@@ -8,15 +8,11 @@
     <!-- Tailwind CSS សម្រាប់ភាពងាយស្រួលក្នុងការរចនា UI មើលទៅស្អាតនៅលើទូរស័ព្ទ -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* NEW: កំណត់អថេរ CSS (CSS variables) សម្រាប់ទំហំ */
-        :root {
-            --page-width: 78mm;
-            --page-height: 50mm;
-        }
+        /* REMOVED: :root variables removed */
 
-        /* NEW: @page rule ឥឡូវប្រើ CSS variables */
+        /* MODIFIED: Reverted to simple @page rule */
         @page {
-            size: var(--page-width) var(--page-height);
+            size: 78mm 50mm;
             margin: 0;
         }
 
@@ -29,10 +25,10 @@
                 margin: 0;
                 padding: 0;
             }
-            /* MODIFIED: ប្រើ CSS variables សម្រាប់ទំហំពេលព្រីន */
+            /* MODIFIED: Reverted to hard-coded size */
             #label-container {
-                width: var(--page-width);
-                height: var(--page-height);
+                width: 78mm;
+                height: 50mm;
                 margin: 0;
                 box-shadow: none; /* លាក់ Shadow ពេល Print */
                 transform: scale(1); /* ធានាថាមិនមានការបង្រួម/ពង្រីក */
@@ -47,10 +43,10 @@
             padding: 1rem;
         }
 
-        /* MODIFIED: ប្រើ CSS variables សម្រាប់ទំហំ preview */
+        /* MODIFIED: Reverted to hard-coded size */
         #label-container {
-            width: var(--page-width); 
-            height: var(--page-height);
+            width: 78mm; 
+            height: 50mm;
             background-color: white;
             padding: 2mm; 
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
@@ -62,7 +58,7 @@
             line-height: 1.2; 
             overflow: hidden;
             border: 1px dashed #ccc; 
-            transition: width 0.3s ease, height 0.3s ease;
+            /* REMOVED: Transition no longer needed */
         }
 
         .label-header {
@@ -143,7 +139,6 @@
             font-weight: 700;
         }
         
-        /* MODIFIED: កែសម្រួល Footer ឱ្យប្រើ Flex */
         .label-footer {
             margin-top: 0.5mm;
             padding-top: 0.5mm;
@@ -155,48 +150,15 @@
         
     </style>
     
-    <!-- REMOVED: បានដក Style Tag ទីពីរចេញ -->
-    
 </head>
 <body class="p-4">
 
     <!-- Print Control UI -->
     <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6">
         <h1 class="text-xl font-bold text-gray-800 mb-2">ទម្រង់ព្រីន Label</h1>
-        <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ ហើយជ្រើសរើសទំហំ Label មុននឹងបោះពុម្ព។</p>
+        <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពុម្ព។ ទំហំត្រូវបានកំណត់ (78mm x 50mm)។</p>
         
-        <!-- NEW: ផ្នែកសម្រាប់ជ្រើសរើសទំហំ -->
-        <div class="mt-4 pt-4 border-t border-gray-200">
-            <h2 class="text-base font-semibold text-gray-700 mb-3">ជម្រើសទំហំ Label</h2>
-            <div class="space-y-2">
-                <div>
-                    <input type="radio" id="preset78" name="labelSize" value="78x50" class="mr-2" checked>
-                    <label for="preset78" class="text-sm text-gray-600">Standard (78mm x 50mm)</label>
-                </div>
-                <div>
-                    <input type="radio" id="preset76" name="labelSize" value="76x48.72" class="mr-2">
-                    <label for="preset76" class="text-sm text-gray-600">Alternative (76mm x 48.72mm)</label>
-                </div>
-                <div>
-                    <input type="radio" id="presetCustom" name="labelSize" value="custom" class="mr-2">
-                    <label for="presetCustom" class="text-sm text-gray-600">Custom (រក្សាសមាមាត្រ)</label>
-                </div>
-            </div>
-            <!-- ช่อง (Field) សម្រាប់ Custom Size (លាក់ទុកជា Default) -->
-            <div id="custom-size-inputs" class="hidden mt-3 space-y-2">
-                <div class="flex items-center space-x-2">
-                    <label for="customWidth" class="text-sm font-medium text-gray-500 w-16">ទទឹង:</label>
-                    <input type="number" id="customWidth" class="w-full p-2 border rounded-md text-sm" value="78">
-                    <span class="text-sm text-gray-500">mm</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <label for="customHeight" class_=("text-sm font-medium text-gray-500 w-16")>បណ្ដោយ:</label>
-                    <input type="number" id="customHeight" class="w-full p-2 border rounded-md text-sm" value="50">
-                    <span class="text-sm text-gray-500">mm</span>
-                </div>
-            </div>
-        </div>
-        <!-- END NEW Section -->
+        <!-- REMOVED: ផ្នែកសម្រាប់ជ្រើសរើសទំហំ -->
         
         <button id="printButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 mt-5">
             ✅ Print Label នេះ
@@ -258,86 +220,7 @@
         const printButton = document.getElementById('printButton');
         const labelContainer = document.getElementById('label-container');
         
-        // --- START MODIFIED SIZE LOGIC ---
-        // REMOVED: const pageStyle = document.getElementById('page-style'); 
-
-        // Radio buttons
-        const radio78 = document.getElementById('preset78');
-        const radio76 = document.getElementById('preset76');
-        const radioCustom = document.getElementById('presetCustom');
-        
-        // Custom inputs
-        const customInputsDiv = document.getElementById('custom-size-inputs');
-        const customWidthInput = document.getElementById('customWidth');
-        const customHeightInput = document.getElementById('customHeight');
-
-        // Base aspect ratio (78 / 50 = 1.56)
-        const baseRatio = 78 / 50;
-        let isUpdating = false; // To prevent infinite loops
-
-        // MODIFIED: Function នេះឥឡូវកែប្រែ CSS variables វិញ
-        function updateLabelSize(width, height) {
-            // Update CSS variables on the root element
-            document.documentElement.style.setProperty('--page-width', width + 'mm');
-            document.documentElement.style.setProperty('--page-height', height + 'mm');
-            
-            // Preview (label-container) និង @page rule នឹងអាប់ដេតដោយស្វ័យប្រវត្តិ
-            // ព្រោះពួកវាប្រើ CSS variables ទាំងនោះ
-        }
-
-        // --- Event Listeners (មិនផ្លាស់ប្តូរ) ---
-        radio78.addEventListener('change', () => {
-            updateLabelSize(78, 50);
-            customWidthInput.value = 78;
-            customHeightInput.value = 50;
-            customInputsDiv.classList.add('hidden');
-        });
-
-        radio76.addEventListener('change', () => {
-            updateLabelSize(76, 48.72);
-            customWidthInput.value = 76;
-            customHeightInput.value = 48.72;
-            customInputsDiv.classList.add('hidden');
-        });
-
-        radioCustom.addEventListener('change', () => {
-            customInputsDiv.classList.remove('hidden');
-            // Trigger a calculation based on current width
-            const w = parseFloat(customWidthInput.value) || 78;
-            const h = w / baseRatio;
-            customHeightInput.value = h.toFixed(2);
-            updateLabelSize(w, h);
-        });
-
-        // Custom Width listener
-        customWidthInput.addEventListener('input', () => {
-            if (isUpdating) return; // Prevent loop
-            isUpdating = true;
-            
-            const w = parseFloat(customWidthInput.value);
-            if (!isNaN(w) && w > 0) {
-                const h = w / baseRatio;
-                customHeightInput.value = h.toFixed(2);
-                updateLabelSize(w, h);
-            }
-            isUpdating = false;
-        });
-
-        // Custom Height listener
-        customHeightInput.addEventListener('input', () => {
-            if (isUpdating) return; // Prevent loop
-            isUpdating = true;
-            
-            const h = parseFloat(customHeightInput.value);
-            if (!isNaN(h) && h > 0) {
-                const w = h * baseRatio;
-                customWidthInput.value = w.toFixed(2);
-                updateLabelSize(w, h);
-            }
-            isUpdating = false;
-        });
-        // --- END MODIFIED SIZE LOGIC ---
-
+        // --- REMOVED: Size selection logic ---
 
         loading.classList.remove('hidden');
 
@@ -373,7 +256,7 @@
             document.getElementById('label-user').textContent = data.user || 'N/A';
             
             // បង្ហាញ Order ID ពិត
-            document.getElementById('label-order-id').textContent = data.id.replace('ORD-', '') || 'N/A';
+            document.getElementById('label-order-id').textContent = data.id.replace('ORD-', '') || 'N/Proof';
             
             // បង្ហាញទីតាំង
             document.getElementById('label-location').textContent = data.location || 'N/A';
