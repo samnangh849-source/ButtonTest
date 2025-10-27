@@ -1,199 +1,208 @@
 <html lang="km">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Label Printer (78mm x 50mm)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        html, body {
-            box-sizing: border-box;
-            font-family: 'Arial', 'Inter', sans-serif;
-        }
-        *, *:before, *:after { box-sizing: inherit; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Label Printer (78mm x 50mm)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      box-sizing: border-box;
+      font-family: 'Inter', 'Noto Sans Khmer', sans-serif;
+      color: #000;
+      background-color: #f3f4f6;
+    }
+    *, *::before, *::after { box-sizing: inherit; }
 
-        #label-container {
-            width: 295px;   /* 78mm */
-            height: 189px;  /* 50mm */
-            background-color: white;
-            margin: 0 auto;
-            padding: 1mm;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            font-size: 8pt;
-            line-height: 1.15;
-            overflow: hidden;
-            border: 1px dashed #ccc;
-        }
+    /* Label Container */
+    #label-container {
+      width: 295px;  /* 78mm */
+      height: 189px; /* 50mm */
+      background: #fff;
+      padding: 4mm 3mm;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      border: 1px solid #000;
+    }
 
-        .label-header {
-            border-bottom: 1px dashed #000;
-            display: flex;
-            justify-content: space-between;
-            font-size: 7pt;
-            font-weight: bold;
-            padding-bottom: 1mm;
-        }
+    .label-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      font-size: 8pt;
+      border-bottom: 1px dashed #000;
+      padding-bottom: 2px;
+    }
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            flex-grow: 1;
-            gap: 1mm;
-        }
+    .info-section {
+      display: flex;
+      justify-content: space-between;
+      flex-grow: 1;
+      padding-top: 2px;
+    }
 
-        .info-block { flex: 1; }
-        .info-block.right {
-            text-align: right;
-            border-left: 1px dashed #ccc;
-            padding-left: 1mm;
-            width: 40%;
-        }
-        .info-block.left { width: 60%; }
+    .info-block {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
 
-        .big-text { font-size: 10pt; font-weight: 700; }
-        .small-text { font-size: 7pt; color: #4b5563; }
-        .data-text { font-size: 9pt; font-weight: 500; }
+    .left { width: 60%; }
+    .right { width: 38%; text-align: right; }
 
-        .total-box {
-            background-color: #f3f4f6;
-            color: #000;
-            padding: 0.5mm;
-            border-radius: 0.125rem;
-            font-weight: 700;
-            font-size: 10pt;
-            margin-top: 0.5mm;
-        }
+    .label-title {
+      font-size: 7pt;
+      font-weight: 600;
+      margin-top: 2px;
+    }
 
-        .label-footer {
-            border-top: 1px dashed #000;
-            text-align: center;
-            font-size: 7pt;
-            font-weight: bold;
-            padding-top: 1mm;
-        }
+    .label-value {
+      font-size: 9pt;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
 
-        @media print {
-            html, body {
-                width: 78mm;
-                height: 50mm;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: none !important;
-            }
+    .total-box {
+      border: 1px solid #000;
+      font-weight: 700;
+      font-size: 10pt;
+      padding: 2px 3px;
+      margin-top: 2px;
+      text-align: center;
+    }
 
-            #label-container {
-                width: 295px;
-                height: 189px;
-                margin: 0 !important;
-                padding: 1mm !important;
-                border: none !important;
-                box-shadow: none !important;
-                border-radius: 0 !important;
-                overflow: hidden !important;
-                page-break-after: always;
-            }
+    .label-footer {
+      border-top: 1px dashed #000;
+      text-align: center;
+      font-weight: 600;
+      font-size: 7.5pt;
+      padding-top: 2px;
+    }
 
-            .no-print { display: none !important; }
-        }
+    @media print {
+      html, body {
+        width: 78mm;
+        height: 50mm;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: none !important;
+      }
 
-        body { background-color: #f0f4f8; padding: 1rem; }
+      #label-container {
+        width: 295px;
+        height: 189px;
+        margin: 0;
+        border: none;
+        box-shadow: none;
+        page-break-after: always;
+      }
 
-        /* Modal Styling */
-        #print-guide-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.4);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-        #print-guide-content {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-    </style>
+      .no-print { display: none !important; }
+    }
+
+    /* UI and Modal */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal-content {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+  </style>
 </head>
 <body>
 
-    <!-- UI មុនព្រីន -->
-    <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6 text-center">
-        <h1 class="text-xl font-bold text-gray-800 mb-2">ទម្រង់ព្រីន Label</h1>
-        <p class="text-sm text-gray-600 mb-4">សូមពិនិត្យទិន្នន័យ មុននឹងបោះពុម្ព។ ទំហំ (78mm x 50mm)</p>
+  <!-- Pre-Print Controls -->
+  <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md mb-6 text-center">
+    <h1 class="text-lg font-semibold mb-2 text-gray-800">Label Printer (78mm x 50mm)</h1>
+    <p class="text-sm text-gray-600 mb-4">ពិនិត្យទិន្នន័យ មុនព្រីន។ អក្សរពណ៌ខ្មៅស្អាត សម្រាប់ Thermal Printer។</p>
 
-        <div class="flex flex-col gap-2">
-            <button id="guideButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                ℹ️ ព័ត៌មានបោះពុម្ព (Print Guide)
-            </button>
+    <div class="flex flex-col gap-2">
+      <button id="guideButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition">
+        ℹ️ ព័ត៌មានបោះពុម្ព (Print Guide)
+      </button>
 
-            <button id="printButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
-                ✅ Print Label នេះ
-            </button>
-        </div>
+      <button id="printButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+        ✅ Print Label នេះ
+      </button>
+    </div>
+  </div>
+
+  <!-- Print Guide Modal -->
+  <div id="print-guide-modal" class="modal-bg flex">
+    <div class="modal-content text-center">
+      <h2 class="text-lg font-semibold mb-2">ការកំណត់ Printer ត្រឹមត្រូវ</h2>
+      <ul class="list-disc pl-5 text-left text-sm mb-4">
+        <li>Destination: <b>EML-200L (2 inch)</b></li>
+        <li>Paper size: <b>Custom 78mm × 50mm</b></li>
+        <li>Scale: <b>100% (Actual Size)</b></li>
+        <li>Margins: <b>None</b></li>
+        <li>Background graphics: <b>ON</b></li>
+      </ul>
+      <button id="closeGuide" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg w-full">បិទ</button>
+    </div>
+  </div>
+
+  <!-- Label -->
+  <div id="label-container">
+    <div class="label-header">
+      <span>Page: <span id="label-page">N/A</span></span>
+      <span>User: <span id="label-user">N/A</span></span>
+      <span>ID: <span id="label-order-id">ORD-XXXXX</span></span>
     </div>
 
-    <!-- Modal (Print Guide) -->
-    <div id="print-guide-modal" class="no-print flex">
-        <div id="print-guide-content">
-            <h2 class="text-lg font-bold mb-2 text-gray-800">ការកំណត់ Printer ត្រឹមត្រូវ</h2>
-            <ul class="list-disc pl-5 text-sm text-gray-700 mb-4 text-left">
-                <li>ជ្រើស <strong>Destination:</strong> EML-200L (2 inch)</li>
-                <li><strong>Paper size:</strong> Custom 78mm × 50mm</li>
-                <li><strong>Scale:</strong> 100% (Actual Size)</li>
-                <li><strong>Margins:</strong> None</li>
-                <li><strong>Background graphics:</strong> ON</li>
-            </ul>
-            <button id="closeGuide" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">បិទ</button>
+    <div class="info-section">
+      <div class="info-block left">
+        <div>
+          <div class="label-title">អ្នកទទួល / Recipient:</div>
+          <div id="label-name" class="label-value">ឈ្មោះអតិថិជន</div>
+          <div id="label-phone" class="label-value">0xx xxx xxx</div>
         </div>
+        <div>
+          <div class="label-title">ទីតាំង / Location:</div>
+          <div id="label-location" class="label-value">ភ្នំពេញថ្មី</div>
+          <div class="label-title">អាសយដ្ឋាន / Address:</div>
+          <div id="label-address" class="label-value">(មិនបានបញ្ជាក់)</div>
+        </div>
+      </div>
+
+      <div class="info-block right">
+        <div>
+          <div class="label-title">កាលបរិច្ឆេទ:</div>
+          <div id="label-date" class="label-value">DD/MM/YYYY</div>
+        </div>
+        <div>
+          <div class="total-box">តម្លៃសរុប: <span id="label-total">$0.00</span></div>
+        </div>
+        <div>
+          <div class="label-title">ស្ថានភាពបង់ប្រាក់:</div>
+          <div id="label-payment" class="label-value">Unpaid</div>
+          <div class="label-title">ដឹកជញ្ជូនដោយ:</div>
+          <div id="label-shipping" class="label-value">N/A</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Label Container -->
-    <div id="label-container">
-        <div class="label-header">
-            <span>Page: <span id="label-page">N/A</span></span>
-            <span>User: <span id="label-user">N/A</span></span>
-            <span>ID: <span id="label-order-id">ORD-XXXXX</span></span>
-        </div>
+    <div class="label-footer">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន!</div>
+  </div>
 
-        <div class="info-row">
-            <div class="info-block left">
-                <div class="small-text font-bold">អ្នកទទួល / Recipient:</div>
-                <div id="label-name" class="big-text">ឈ្មោះអតិថិជន</div>
-                <div id="label-phone">0xx xxx xxx</div>
-
-                <div class="small-text font-bold">ទីតាំង / Location:</div>
-                <div id="label-location" class="data-text">ភ្នំពេញថ្មី</div>
-
-                <div class="small-text font-bold">អាសយដ្ឋាន / Address:</div>
-                <div id="label-address" class="data-text">(មិនបានបញ្ជាក់)</div>
-            </div>
-
-            <div class="info-block right">
-                <div class="small-text font-bold">កាលបរិច្ឆេទ:</div>
-                <div id="label-date" class="data-text">DD/MM/YYYY</div>
-
-                <div class="total-box">តម្លៃសរុប: <span id="label-total">$0.00</span></div>
-
-                <div class="small-text font-bold">ស្ថានភាពបង់ប្រាក់:</div>
-                <div id="label-payment" class="data-text">Unpaid</div>
-
-                <div class="small-text font-bold">ដឹកជញ្ជូនដោយ:</div>
-                <div id="label-shipping" class="data-text">N/A</div>
-            </div>
-        </div>
-
-        <div class="label-footer">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន!</div>
-    </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
-    if (params.id) {
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
+      if (params.id) {
         document.getElementById('label-page').textContent = params.page || 'N/A';
         document.getElementById('label-user').textContent = params.user || 'N/A';
         document.getElementById('label-order-id').textContent = params.id || 'N/A';
@@ -206,22 +215,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('label-shipping').textContent = params.shipping || 'N/A';
 
         const today = new Date();
-        const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth()+1).padStart(2, '0')}/${today.getFullYear()}`;
         document.getElementById('label-date').textContent = d;
-    }
+      }
 
-    // Print button
-    document.getElementById('printButton').addEventListener('click', () => window.print());
-
-    // Guide modal
-    const guideBtn = document.getElementById('guideButton');
-    const guideModal = document.getElementById('print-guide-modal');
-    const closeGuide = document.getElementById('closeGuide');
-
-    guideBtn.addEventListener('click', () => guideModal.style.display = 'flex');
-    closeGuide.addEventListener('click', () => guideModal.style.display = 'none');
-});
-</script>
-
+      document.getElementById('printButton').addEventListener('click', () => window.print());
+      const guideBtn = document.getElementById('guideButton');
+      const guideModal = document.getElementById('print-guide-modal');
+      const closeGuide = document.getElementById('closeGuide');
+      guideBtn.addEventListener('click', () => guideModal.style.display = 'flex');
+      closeGuide.addEventListener('click', () => guideModal.style.display = 'none');
+    });
+  </script>
 </body>
 </html>
