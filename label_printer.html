@@ -275,7 +275,7 @@
 
         <div class="flex flex-col gap-2">
             <button id="guideButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                ព័ត៌មានបោះពុម្ព(ការកំណត់)
+                ព័ត៌មានបោះពuម្ព(ការកំណត់)
             </button>
 
             <button id="printButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
@@ -316,7 +316,8 @@
     <div id="label-container">
         <!-- *** Added 'editable-element' class and unique IDs to all text elements *** -->
         <div class="label-header editable-element" id="label-header-el">
-            <span>Page: <span id="label-page">N/A</span></span>
+            <!-- *** MODIFIED: Removed "Page: " text *** -->
+            <span><span id="label-page">N/A</span></span>
             <span>User: <span id="label-user">N/A</span></span>
             <span>ID: <span id="label-order-id">ORD-XXXXX</span></span>
         </div>
@@ -418,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('label-address').textContent = params.address || '(មិនបានបញ្ជាក់)';
         document.getElementById('label-total').textContent = params.total ? `$${parseFloat(params.total).toFixed(2)}` : 'N/A';
         document.getElementById('label-payment').textContent = params.payment || 'Unpaid';
-        document.getElementById('label-shipping').textContent = params.shipping || 'N/A';
+        document.getElementById('label-shipping').textContent = params.shipping || 'N/S';
 
         const today = new Date();
         const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
