@@ -8,7 +8,17 @@
     <!-- Tailwind CSS សម្រាប់ភាពងាយស្រួលក្នុងការរចនា UI មើលទៅស្អាតនៅលើទូរស័ព្ទ -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* MODIFIED: បានដក @page rule ចេញពីទីនេះ */
+        /* NEW: កំណត់អថេរ CSS (CSS variables) សម្រាប់ទំហំ */
+        :root {
+            --page-width: 78mm;
+            --page-height: 50mm;
+        }
+
+        /* NEW: @page rule ឥឡូវប្រើ CSS variables */
+        @page {
+            size: var(--page-width) var(--page-height);
+            margin: 0;
+        }
 
         /* លាក់ប៊ូតុង និង UI ផ្សេងៗនៅពេលបោះពុម្ព */
         @media print {
@@ -19,9 +29,10 @@
                 margin: 0;
                 padding: 0;
             }
+            /* MODIFIED: ប្រើ CSS variables សម្រាប់ទំហំពេលព្រីន */
             #label-container {
-                width: 78mm;
-                height: 50mm;
+                width: var(--page-width);
+                height: var(--page-height);
                 margin: 0;
                 box-shadow: none; /* លាក់ Shadow ពេល Print */
                 transform: scale(1); /* ធានាថាមិនមានការបង្រួម/ពង្រីក */
@@ -36,33 +47,31 @@
             padding: 1rem;
         }
 
+        /* MODIFIED: ប្រើ CSS variables សម្រាប់ទំហំ preview */
         #label-container {
-            width: 78mm; /* ទំហំ Label ពិតប្រាកដ */
-            height: 50mm;
+            width: var(--page-width); 
+            height: var(--page-height);
             background-color: white;
-            padding: 2mm; /* MODIFIED: កាត់បន្ថយ Padding */
+            padding: 2mm; 
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
             border-radius: 0.25rem;
             margin: 20px auto;
             display: flex;
             flex-direction: column;
-            /* MODIFIED: ដក justify-content ចេញ ដើម្បីឱ្យ flow ធម្មតា */
-            font-size: 8pt; /* កំណត់ Font size មូលដ្ឋាន */
-            line-height: 1.2; /* MODIFIED: កាត់បន្ថយ Line height */
+            font-size: 8pt; 
+            line-height: 1.2; 
             overflow: hidden;
-            border: 1px dashed #ccc; /* បង្ហាញបន្ទាត់ព្រំដែននៅលើអេក្រង់ */
-            /* NEW: បន្ថែម transition ដើម្បីឱ្យការប្តូរទំហំមើលទៅរលូន */
+            border: 1px dashed #ccc; 
             transition: width 0.3s ease, height 0.3s ease;
         }
 
         .label-header {
             border-bottom: 1px dashed #000;
-            padding-bottom: 0.5mm; /* MODIFIED: កាត់បន្ថយ */
-            margin-bottom: 0.5mm; /* MODIFIED: កាត់បន្ថយ */
+            padding-bottom: 0.5mm; 
+            margin-bottom: 0.5mm; 
             display: flex;
             justify-content: space-between;
             align-items: center;
-            /* MODIFIED: កំណត់ទំហំអក្សរតូចសម្រាប់ Header ទាំងមូល */
             font-size: 7pt;
             font-weight: 700;
             color: #4b5563;
@@ -72,32 +81,32 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            flex-grow: 1; /* អោយវាយកកន្លែងដែលនៅសល់ */
-            gap: 2mm; /* គម្លាតរវាងចំហៀងឆ្វេងនិងស្តាំ */
-            min-height: 0; /* ជួសជុលបញ្ហា flexbox overflow */
+            flex-grow: 1; 
+            gap: 2mm; 
+            min-height: 0; 
         }
         
         .info-block {
             flex: 1;
-            min-width: 0; /* ជួសជុលបញ្ហា Flexbox overflow */
+            min-width: 0; 
         }
 
         .info-block.right {
             text-align: right;
             border-left: 1px dashed #ccc;
             padding-left: 2mm;
-            flex-shrink: 0; /* កុំអោយវាតូចជាង */
-            width: 40%; /* កំណត់ទទឹងចំហៀងស្តាំ */
+            flex-shrink: 0; 
+            width: 40%; 
         }
         
         .info-block.left {
-            width: 60%; /* កំណត់ទទឹងចំហៀងឆ្វេង */
+            width: 60%; 
         }
 
         .big-text {
-            font-size: 10pt; /* MODIFIED: កាត់បន្ថយទំហំពី 12pt */
+            font-size: 10pt; 
             font-weight: 700;
-            word-wrap: break-word; /* កុំអោយឈ្មោះវែងហៀរ */
+            word-wrap: break-word; 
             color: #000;
         }
         
@@ -114,8 +123,8 @@
         }
 
         .total-box {
-            background-color: #f3f4f6; /* MODIFIED: ប្រើពណ៌ប្រផេះស្រាល */
-            color: #000; /* MODIFIED: ប្រើពណ៌ខ្មៅ */
+            background-color: #f3f4f6; 
+            color: #000; 
             padding: 1mm 1.5mm;
             border-radius: 0.125rem;
             margin-top: 1mm;
@@ -126,11 +135,11 @@
         
         /* Style សម្រាប់ស្ថានភាពបង់ប្រាក់ */
         #label-payment.paid {
-            color: #000; /* MODIFIED: ដាក់ពណ៌ខ្មៅ */
+            color: #000; 
             font-weight: 700;
         }
         #label-payment.unpaid {
-            color: #000; /* MODIFIED: ដាក់ពណ៌ខ្មៅ */
+            color: #000; 
             font-weight: 700;
         }
         
@@ -140,19 +149,14 @@
             padding-top: 0.5mm;
             border-top: 2px dashed #000;
             display: flex;
-            justify-content: center; /* MODIFIED: Center the text */
+            justify-content: center; 
             align-items: center;
         }
         
     </style>
     
-    <!-- NEW: Style Tag ថ្មីសម្រាប់ @page rule ដែលអាចកែប្រែដោយ JavaScript -->
-    <style id="page-style">
-        @page {
-            size: 78mm 50mm;
-            margin: 0;
-        }
-    </style>
+    <!-- REMOVED: បានដក Style Tag ទីពីរចេញ -->
+    
 </head>
 <body class="p-4">
 
@@ -243,7 +247,7 @@
         
         <!-- FOOTER -->
         <div class="label-footer">
-             <div class="small-text font-bold text-gray-700">សូមដឹកជញ្ជូនដោយប្រុងប្រយ័ត្ន! </div>
+             <div class="small-text font-bold text-gray-700">សូមដឹកជញ្ជូនដោយប្រុងប្រយត្ន! </div>
         </div>
 
     </div>
@@ -254,8 +258,8 @@
         const printButton = document.getElementById('printButton');
         const labelContainer = document.getElementById('label-container');
         
-        // --- START NEW SIZE LOGIC ---
-        const pageStyle = document.getElementById('page-style'); // The new <style> tag
+        // --- START MODIFIED SIZE LOGIC ---
+        // REMOVED: const pageStyle = document.getElementById('page-style'); 
 
         // Radio buttons
         const radio78 = document.getElementById('preset78');
@@ -271,22 +275,17 @@
         const baseRatio = 78 / 50;
         let isUpdating = false; // To prevent infinite loops
 
-        // Function to update the styles
+        // MODIFIED: Function នេះឥឡូវកែប្រែ CSS variables វិញ
         function updateLabelSize(width, height) {
-            // Update preview
-            labelContainer.style.width = width + 'mm';
-            labelContainer.style.height = height + 'mm';
+            // Update CSS variables on the root element
+            document.documentElement.style.setProperty('--page-width', width + 'mm');
+            document.documentElement.style.setProperty('--page-height', height + 'mm');
             
-            // Update print style
-            pageStyle.innerHTML = `
-                @page {
-                    size: ${width}mm ${height}mm;
-                    margin: 0;
-                }
-            `;
+            // Preview (label-container) និង @page rule នឹងអាប់ដេតដោយស្វ័យប្រវត្តិ
+            // ព្រោះពួកវាប្រើ CSS variables ទាំងនោះ
         }
 
-        // --- Event Listeners ---
+        // --- Event Listeners (មិនផ្លាស់ប្តូរ) ---
         radio78.addEventListener('change', () => {
             updateLabelSize(78, 50);
             customWidthInput.value = 78;
@@ -337,7 +336,7 @@
             }
             isUpdating = false;
         });
-        // --- END NEW SIZE LOGIC ---
+        // --- END MODIFIED SIZE LOGIC ---
 
 
         loading.classList.remove('hidden');
