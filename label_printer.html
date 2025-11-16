@@ -6,7 +6,7 @@
     <!-- Import Font Kantumruy Pro -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;700;900&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -96,6 +96,22 @@
             margin-top: 0.5mm;
         }
         #label-total { font-size: 10pt; } /* ទំហំតម្លៃសរ uš */
+
+        /* --- NEW COD STYLES (Black & White) --- */
+        .cod-tag {
+            font-size: 6.5pt; /* Slightly smaller to fit */
+            font-weight: 700; /* Bold */
+            color: #000; /* Black text */
+            background-color: #FFFFFF; /* White background */
+            padding: 0.5mm 1mm;
+            margin-top: 1mm;
+            line-height: 1.1;
+            border: 1px solid #000; /* Black border */
+            border-radius: 4px;
+            display: block; /* Takes up its own line to be under shipping */
+            text-align: right; /* Aligns to the right side of the info block */
+        }
+        /* --- END NEW COD STYLES --- */
 
         .label-footer {
             border-top: 1px dashed #000;
@@ -346,6 +362,9 @@
 
                 <div class="small-text mt-1 editable-element" id="label-shipping-title">ដឹកជញ្ជូនដោយ:</div>
                 <div id="label-shipping" class="data-text editable-element">N/A</div>
+                
+                <!-- NEW: COD Tag for Unpaid orders -->
+                <div id="label-cod" class="cod-tag editable-element hidden">COD (Cash on Delivery)</div>
             </div>
         </div>
 
@@ -420,6 +439,20 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('label-total').textContent = params.total ? `$${parseFloat(params.total).toFixed(2)}` : 'N/A';
         document.getElementById('label-payment').textContent = params.payment || 'Unpaid';
         document.getElementById('label-shipping').textContent = params.shipping || 'N/S';
+
+        // --- NEW COD LOGIC: Check payment status and show COD if unpaid ---
+        const paymentStatus = params.payment ? params.payment.toLowerCase() : 'unpaid';
+        const codElement = document.getElementById('label-cod');
+
+        if (codElement) {
+            if (paymentStatus === 'unpaid') {
+                codElement.classList.remove('hidden');
+                codElement.textContent = 'COD (Cash on Delivery)';
+            } else {
+                codElement.classList.add('hidden');
+            }
+        }
+        // --- END NEW COD LOGIC ---
 
         const today = new Date();
         const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
@@ -548,17 +581,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isDesignMode = false;
     let selectedElement = null;
-    // *** REMOVED Dragging variables (isDragging, offsetX, offsetY) ***
 
     // 1. Load Saved Styles on Page Load
     function loadAllStyles() {
         const savedStyles = JSON.parse(localStorage.getItem(STYLES_KEY) || '{}');
-        // *** REMOVED Layout switching logic ***
         
         editableElements.forEach(el => {
             const style = savedStyles['#' + el.id];
             if (style) {
-                // *** REMOVED top/left loading ***
                 el.style.fontSize = style.fontSize;
             }
         });
@@ -581,8 +611,6 @@ document.addEventListener('DOMContentLoaded', () => {
         savedStyles['#' + element.id] = existingStyle;
         localStorage.setItem(STYLES_KEY, JSON.stringify(savedStyles));
     }
-
-    // *** REMOVED convertToAbsolute() function ***
 
     // 4. Show/Hide Style Editor
     function showEditor(element) {
@@ -608,9 +636,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         selectedElement = null;
     }
-
-    // *** REMOVED Drag and Drop Event Handlers (onDragStart, onDrag, onDragEnd) ***
-    // *** REMOVED Global Listener handlers (handleDragMove, handleDragEnd, etc.) ***
 
     // 6. Main Toggle Logic
     editableElements.forEach(el => {
@@ -654,4 +679,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
