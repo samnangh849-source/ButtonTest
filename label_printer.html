@@ -58,6 +58,9 @@
         }
         *, *:before, *:after { box-sizing: inherit; }
 
+        /* Helper to force hide */
+        .hidden { display: none !important; }
+
         /* --- STYLES សម្រាប់ Label ទាំងអស់ (ទាំង Label ដើម និង QR) --- */
         .label-page {
             /* ទំហំត្រូវបានកំណត់ដោយ JS តាមរយៈ CSS variables */
@@ -169,8 +172,8 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            /* Use flexbox to distribute space vertically */
-            display: flex !important;
+            /* REMOVED !important to allow hidden class to work */
+            /* display: flex;  <- Inherited from .label-page */
             flex-direction: column;
             padding-top: 4mm;
             padding-bottom: 4mm;
