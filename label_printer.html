@@ -2,13 +2,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Label Printer (78x50mm)</title>
+    <title>Label Printer (78x50mm) + QR</title>
     <!-- Import Font Kantumruy Pro -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;700;900&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import QRCode.js សម្រាប់បង្កើត QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
         /* CSS Variables សម្រាប់គ្រប់គ្រងទំហំ និង Margin */
         :root {
@@ -20,40 +24,42 @@
             --page-margin-left: 0mm;
         }
 
-        
         html, body {
             box-sizing: border-box;
-            /* ប្រើ Font Kantumruy Pro */
             font-family: 'Kantumruy Pro', 'Arial', 'Inter', sans-serif;
-            color: #000; /* ពណ៌អក្សរគោល ខ្មៅ */
+            color: #000;
         }
         *, *:before, *:after { box-sizing: inherit; }
 
-        #label-container {
-            /* ប្រើ CSS Variable សម្រាប់ទំហំ */
+        /* --- STYLES សម្រាប់ Label ទាំងអស់ (ទាំង Label ដើម និង QR) --- */
+        .label-page {
             width: var(--page-width); 
             height: var(--page-height);
             background-color: white;
             margin: 0 auto;
-            /* គម្លាត 1mm លើក្រោម, 3mm ឆ្វេងស្តាំ */
             padding: 1mm 3mm; 
-            display: flex; /* *** MODIFIED: This layout is now PERMANENT *** */
+            display: flex;
             flex-direction: column;
             justify-content: space-between;
             font-size: 8pt;
             line-height: 1.15;
             overflow: hidden;
             border: 1px dashed #ccc;
-            position: relative; /* Kept for safety, but not for dragging */
+            position: relative;
+            
+            /* បន្ថែម margin-bottom ដើម្បីអោយមានគម្លាតរវាង Label ទាំងពីរពេលមើលលើអេក្រង់ */
+            margin-bottom: 20px; 
         }
 
+        /* --- Styles សម្រាប់ Label ព័ត៌មាន (Label ដើម) --- */
         .label-header {
             border-bottom: 1px dashed #000;
             display: flex;
             justify-content: space-between;
             font-size: 7pt;
-            font-weight: 500; /* Medium weight */
+            font-weight: 500;
             padding-bottom: 1mm;
+            width: 100%;
         }
 
         .info-row {
@@ -63,6 +69,7 @@
             gap: 1mm;
             padding-top: 0.5mm;
             padding-bottom: 0.5mm;
+            width: 100%;
         }
 
         .info-block { flex: 1; }
@@ -74,21 +81,19 @@
         }
         .info-block.left { width: 60%; }
 
-        /* Label (អក្សរចំណងជើងតូច) */
         .small-text { 
             font-size: 7pt; 
-            font-weight: 500; /* Medium */
-            color: #333; /* ប្រើពណ៌ខ្មៅស្រាលបន្តិច ជំនួសប្រផេះ */
+            font-weight: 500; 
+            color: #333; 
         }
         
-        /* Data (ទិន្នន័យ) */
-        .big-text { font-size: 10pt; font-weight: 700; } /* ឈ្មោះ */
-        #label-phone { font-size: 11pt; font-weight: 700; } /* លេខទូរស័ព្ទ */
-        #label-location { font-size: 11pt; font-weight: 700; } /* ទីតាំង */
-        .data-text { font-size: 9pt; font-weight: 700; } /* ទិន្នន័យផ្សេងទៀត */
+        .big-text { font-size: 10pt; font-weight: 700; } 
+        #label-phone { font-size: 11pt; font-weight: 700; } 
+        #label-location { font-size: 11pt; font-weight: 700; } 
+        .data-text { font-size: 9pt; font-weight: 700; } 
 
         .total-box {
-            background-color: #f0f0f0; /* ពណ៌ផ្ទៃប្រផេះស្រាល */
+            background-color: #f0f0f0;
             color: #000;
             padding: 0.5mm;
             border-radius: 0.125rem;
@@ -96,35 +101,45 @@
             font-size: 10pt;
             margin-top: 0.5mm;
         }
-        #label-total { font-size: 10pt; } /* ទំហំតម្លៃសរ uš */
+        #label-total { font-size: 10pt; }
 
-        /* --- NEW COD STYLES (Black & White) --- */
         .cod-tag {
-            font-size: 6.5pt; /* Slightly smaller to fit */
-            font-weight: 700; /* Bold */
-            color: #000; /* Black text */
-            background-color: #FFFFFF; /* White background */
+            font-size: 6.5pt;
+            font-weight: 700;
+            color: #000;
+            background-color: #FFFFFF;
             padding: 0.5mm 1mm;
             margin-top: 1mm;
             line-height: 1.1;
-            border: 1px solid #000; /* Black border */
+            border: 1px solid #000;
             border-radius: 4px;
-            display: block; /* Takes up its own line to be under shipping */
-            text-align: right; /* Aligns to the right side of the info block */
+            display: block;
+            text-align: right;
         }
-        /* --- END NEW COD STYLES --- */
 
         .label-footer {
             border-top: 1px dashed #000;
             text-align: center;
             font-size: 7pt;
-            font-weight: 700; /* Bold */
+            font-weight: 700;
             padding-top: 1mm;
+            width: 100%;
+        }
+
+        /* --- Styles សម្រាប់ QR Label ថ្មី --- */
+        #qr-label-container {
+            /* Center content */
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        #qrcode img {
+            margin: 0 auto; /* Center QR image */
+            display: block;
         }
 
         /* ---------------- PRINT STYLES ---------------- */
         @page {
-            /* ប្រើ CSS Variables សម្រាប់ទំហំ និង Margin ពេល Print */
             size: var(--page-width) var(--page-height);
             margin-top: var(--page-margin-top);
             margin-right: var(--page-margin-right);
@@ -141,16 +156,23 @@
                 background: none !important;
             }
 
-            #label-container {
+            /* Apply print styles to generic label-page class */
+            .label-page {
                 width: 100%;
                 height: 100%;
                 margin: 0 !important;
-                padding: 1mm 3mm !important; /* រក្សាគម្លាតពេល Print */
+                padding: 1mm 3mm !important;
                 border: none !important;
                 box-shadow: none !important;
                 border-radius: 0 !important;
                 overflow: hidden !important;
-                page-break-after: always;
+                page-break-after: always; /* ដាក់ Page break */
+                margin-bottom: 0 !important;
+            }
+
+            /* Class សម្រាប់លាក់ Element ពេល Print (ប្រើសម្រាប់លាក់ Label មួយពេលព្រីនមួយទៀត) */
+            .hidden-on-print {
+                display: none !important;
             }
 
             .no-print { display: none !important; }
@@ -180,21 +202,19 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
-        /* *** Design Mode Styles *** */
+        /* Design Mode Styles */
         .editable-element {
             cursor: default;
             transition: outline 0.1s ease-in-out;
         }
-        /* *** MODIFIED: Removed 'move' cursor, changed to 'text' *** */
         .design-mode-active .editable-element {
-            cursor: text; /* 'text' cursor when editable */
+            cursor: text;
         }
         .editable-element.selected {
-            outline: 2px dashed #007bff; /* Highlight selected */
+            outline: 2px dashed #007bff;
             z-index: 10;
         }
         
-        /* *** Style Editor Position *** */
         #styleEditor {
             position: fixed;
             z-index: 1001;
@@ -203,22 +223,19 @@
             border-radius: 0.5rem;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             border: 1px solid #ddd;
-            
-            /* New Position: Fixed at bottom-center */
-            bottom: -200px; /* Start hidden */
+            bottom: -200px;
             left: 50%;
             transform: translateX(-50%);
             width: 300px;
             max-width: 90%;
             transition: bottom 0.3s ease-in-out;
         }
-        /* *** END: Design Mode Styles *** */
 
     </style>
 </head>
 <body>
 
-    <!-- UI មុនព្រីន -->
+    <!-- UI មុនព្រីន (Control Panel) -->
     <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6 text-center">
         <h1 class="text-xl font-bold text-gray-800 mb-2">ទម្រង់ព្រីន Label</h1>
         <p class="text-sm text-gray-600 mb-4">ទំហំគោល (78mm x 50mm)</p>
@@ -236,7 +253,6 @@
                     <span class="ml-2 text-sm">Customize</span>
                 </label>
             </div>
-            <!-- ช่อง Custom -->
             <div id="custom-size-inputs" class="hidden grid grid-cols-2 gap-3">
                 <div>
                     <label for="customWidth" class="block text-xs font-medium text-gray-600 text-left mb-1">ទទឹង (Width)</label>
@@ -272,31 +288,34 @@
             </div>
         </div>
 
-        <!-- *** Design Mode Toggle *** -->
+        <!-- Design Mode Toggle -->
         <div class="border-b border-gray-200 pb-4 mb-4">
             <label class="flex items-center cursor-pointer">
                 <input type="checkbox" id="designModeToggle" class="form-checkbox h-5 w-5 text-blue-600">
                 <span class="ml-2 text-sm text-gray-700">កែរចនាបទ Label</span>
             </label>
         </div>
-        <!-- *** END: Design Mode Toggle *** -->
 
-        <!-- *** Reset Button *** -->
+        <!-- Reset Button -->
         <div class="border-b border-gray-200 pb-4 mb-4">
             <button id="resetDesignButton" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
                 Reset រចនាបទ ទៅដូចដើម
             </button>
         </div>
-        <!-- *** END: Reset Button *** -->
-
 
         <div class="flex flex-col gap-2">
             <button id="guideButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
                 ព័ត៌មានបោះពុម្ព(ការកំណត់)
             </button>
 
+            <!-- Main Print Button -->
             <button id="printButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
                 Print Label
+            </button>
+
+            <!-- QR Print Button (Hidden by default, shown if map exists) -->
+            <button id="printQRButton" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
+                Print QR Code Map
             </button>
         </div>
     </div>
@@ -315,7 +334,7 @@
         </div>
     </div>
 
-    <!-- *** Style Editor Panel *** -->
+    <!-- Style Editor Panel -->
     <div id="styleEditor" class="no-print">
         <div class="flex justify-between items-center mb-2">
             <h4 id="editorTitle" class="text-sm font-bold">Edit Element</h4>
@@ -326,20 +345,19 @@
             <input type="number" id="editorFontSize" class="w-full border border-gray-300 p-1 rounded" step="0.5">
         </div>
     </div>
-    <!-- *** END: Style Editor Panel *** -->
 
 
-    <!-- Label Container -->
-    <div id="label-container">
-        <!-- *** Added 'editable-element' class and unique IDs to all text elements *** -->
+    <!-- ========================================= -->
+    <!--          LABEL 1: Main Information        -->
+    <!-- ========================================= -->
+    <div id="label-container" class="label-page">
         <div class="label-header editable-element" id="label-header-el">
-            <!-- *** MODIFIED: Removed "Page: " text *** -->
             <span><span id="label-page">N/A</span></span>
             <span>User: <span id="label-user">N/A</span></span>
             <span>ID: <span id="label-order-id">ORD-XXXXX</span></span>
         </div>
 
-        <div class="info-row" id="info-row-el"> <!-- This container itself is not editable -->
+        <div class="info-row" id="info-row-el">
             <div class="info-block left">
                 <div class="small-text editable-element" id="label-recipient-title">អ្នកទទួល / Recipient:</div>
                 <div id="label-name" class="big-text editable-element">ឈ្មោះអតិថិជន</div>
@@ -364,12 +382,23 @@
                 <div class="small-text mt-1 editable-element" id="label-shipping-title">ដឹកជញ្ជូនដោយ:</div>
                 <div id="label-shipping" class="data-text editable-element">N/A</div>
                 
-                <!-- NEW: COD Tag for Unpaid orders -->
                 <div id="label-cod" class="cod-tag editable-element hidden">COD (Cash on Delivery)</div>
             </div>
         </div>
 
         <div class="label-footer editable-element" id="label-footer-el">សូមដឹកជញ្ជូនដោយប្រុងប្រយ័ត្ន!</div>
+    </div>
+
+    <!-- ========================================= -->
+    <!--          LABEL 2: QR Code (Hidden)        -->
+    <!-- ========================================= -->
+    <div id="qr-label-container" class="label-page hidden">
+        <div class="w-full h-full flex flex-col justify-center items-center text-center">
+            <h2 class="text-sm font-bold mb-2">Scan for Location</h2>
+            <!-- QR Code Render Target -->
+            <div id="qrcode" class="mb-2 bg-white p-1"></div>
+            <p class="text-xs font-bold" id="qr-map-link-text">Google Maps Link</p>
+        </div>
     </div>
 
     <!-- Audio Players -->
@@ -426,10 +455,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentAudio.removeEventListener('ended', onAudioEnded); 
         currentAudio.addEventListener('ended', onAudioEnded, { once: true }); 
     }
-    // *** END: Audio Management Logic ***
-
 
     if (params.id) {
+        // Fill Data
         document.getElementById('label-page').textContent = params.page || 'N/A';
         document.getElementById('label-user').textContent = params.user || 'N/A';
         document.getElementById('label-order-id').textContent = params.id || 'N/A';
@@ -441,10 +469,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('label-payment').textContent = params.payment || 'Unpaid';
         document.getElementById('label-shipping').textContent = params.shipping || 'N/S';
 
-        // --- NEW COD LOGIC: Check payment status and show COD if unpaid ---
+        // COD Logic
         const paymentStatus = params.payment ? params.payment.toLowerCase() : 'unpaid';
         const codElement = document.getElementById('label-cod');
-
         if (codElement) {
             if (paymentStatus === 'unpaid') {
                 codElement.classList.remove('hidden');
@@ -453,7 +480,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 codElement.classList.add('hidden');
             }
         }
-        // --- END NEW COD LOGIC ---
+
+        // ===============================================
+        // NEW: QR Code Logic (Check for 'map' param)
+        // ===============================================
+        if (params.map) {
+            const qrContainer = document.getElementById('qr-label-container');
+            const qrButton = document.getElementById('printQRButton');
+            const mapUrl = decodeURIComponent(params.map);
+
+            // 1. Show the QR Label Container (Preview)
+            qrContainer.classList.remove('hidden');
+            
+            // 2. Show the Print QR Button
+            qrButton.classList.remove('hidden');
+
+            // 3. Generate the QR Code
+            document.getElementById('qrcode').innerHTML = ""; // Clear old code
+            new QRCode(document.getElementById('qrcode'), {
+                text: mapUrl,
+                width: 128, // QR Size
+                height: 128,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.M
+            });
+        }
+        // ===============================================
 
         const today = new Date();
         const d = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
@@ -466,15 +519,50 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.addEventListener('touchstart', playWelcomeOnFirstInteraction, { once: true });
     }
 
-    // Print button
-    document.getElementById('printButton').addEventListener('click', () => {
+    // ===============================================
+    // PRINT LOGIC (Handle Single Label Printing)
+    // ===============================================
+    function printSpecificLabel(containerIdToPrint) {
+        // Find all label pages
+        const allLabels = document.querySelectorAll('.label-page');
+        
+        // Loop through and hide the ones NOT being printed
+        allLabels.forEach(label => {
+            if (label.id !== containerIdToPrint) {
+                label.classList.add('hidden-on-print');
+            } else {
+                label.classList.remove('hidden-on-print');
+            }
+        });
+
+        // Trigger Print
         window.print();
+
+        // Remove hidden classes after print dialogue closes (so preview returns to normal)
+        // Note: window.print() is blocking in many browsers, but not all. 
+        // We use a small timeout or just run immediately after since JS pauses.
+        allLabels.forEach(label => {
+            label.classList.remove('hidden-on-print');
+        });
+
         setTimeout(() => {
             playAudio(audioSuccess);
-        }, 40000); 
+        }, 1000); 
+    }
+
+    // Button: Print MAIN Label
+    document.getElementById('printButton').addEventListener('click', () => {
+        printSpecificLabel('label-container');
     });
 
-    // Guide modal
+    // Button: Print QR Code
+    document.getElementById('printQRButton').addEventListener('click', () => {
+        printSpecificLabel('qr-label-container');
+    });
+    // ===============================================
+
+
+    // Guide modal logic
     const guideBtn = document.getElementById('guideButton');
     const guideModal = document.getElementById('print-guide-modal');
     const closeGuide = document.getElementById('closeGuide');
@@ -493,13 +581,13 @@ document.addEventListener('DOMContentLoaded', () => {
         guideModal.style.display = 'none';
     });
 
-    // ------------------- Label Size Logic -------------------
+    // Label Size Logic (Updates ALL .label-page elements)
     const rootStyle = document.documentElement.style;
     const sizeRadios = document.querySelectorAll('input[name="label_size"]');
     const customInputsDiv = document.getElementById('custom-size-inputs');
     const customWidthInput = document.getElementById('customWidth');
     const customHeightInput = document.getElementById('customHeight');
-    const labelContainer = document.getElementById('label-container');
+    const labelContainers = document.querySelectorAll('.label-page'); // Select ALL labels
     const standardRatio = 78 / 50; 
     let isUpdating = false; 
 
@@ -507,9 +595,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isUpdating) return;
         rootStyle.setProperty('--page-width', `${width}mm`);
         rootStyle.setProperty('--page-height', `${height}mm`);
-        labelContainer.style.width = `${width * 3.7795275591}px`;
-        labelContainer.style.height = `${height * 3.7795275591}px`;
+        
+        // Update pixel dimensions for screen preview
+        const pixelWidth = width * 3.7795275591;
+        const pixelHeight = height * 3.7795275591;
+        
+        labelContainers.forEach(container => {
+            container.style.width = `${pixelWidth}px`;
+            container.style.height = `${pixelHeight}px`;
+        });
     }
+
     sizeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             if (e.target.value === 'standard') {
@@ -539,7 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isUpdating = false;
     });
 
-    // ------------------- Margin Logic -------------------
+    // Margin Logic
     const marginInputs = [
         { id: 'marginTop', key: '--page-margin-top' },
         { id: 'marginRight', key: '--page-margin-right' },
@@ -563,8 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-
-    // ------------------- *** MODIFIED: Design Mode Logic (No Dragging) *** -------------------
+    // Design Mode Logic
     const designModeToggle = document.getElementById('designModeToggle');
     const styleEditor = document.getElementById('styleEditor');
     const editorTitle = document.getElementById('editorTitle');
@@ -573,7 +668,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const editableElements = document.querySelectorAll('.editable-element');
     const STYLES_KEY = 'labelStyles';
 
-    // *** Reset Button Listener ***
     const resetDesignButton = document.getElementById('resetDesignButton');
     resetDesignButton.addEventListener('click', () => {
         localStorage.removeItem(STYLES_KEY);
@@ -583,10 +677,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let isDesignMode = false;
     let selectedElement = null;
 
-    // 1. Load Saved Styles on Page Load
     function loadAllStyles() {
         const savedStyles = JSON.parse(localStorage.getItem(STYLES_KEY) || '{}');
-        
         editableElements.forEach(el => {
             const style = savedStyles['#' + el.id];
             if (style) {
@@ -595,34 +687,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Save Style for a Specific Element
     function saveStyle(element) {
         if (!element) return;
         const savedStyles = JSON.parse(localStorage.getItem(STYLES_KEY) || '{}');
-        
-        // *** MODIFIED: Only save fontSize ***
-        const styleData = {
-            fontSize: element.style.fontSize
-        };
-
-        // Check if element already has saved style, if so, preserve other properties (like position, if it was saved before)
+        const styleData = { fontSize: element.style.fontSize };
         let existingStyle = savedStyles['#' + element.id] || {};
-        existingStyle.fontSize = styleData.fontSize; // Only update font size
-        
+        existingStyle.fontSize = styleData.fontSize; 
         savedStyles['#' + element.id] = existingStyle;
         localStorage.setItem(STYLES_KEY, JSON.stringify(savedStyles));
     }
 
-    // 4. Show/Hide Style Editor
     function showEditor(element) {
         selectedElement = element;
         editableElements.forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
-
-        styleEditor.style.bottom = '10px'; // Slide in
-
+        styleEditor.style.bottom = '10px'; 
         editorTitle.textContent = `Edit: #${element.id}`;
-        // *** MODIFIED: Ensure we get computed style if no inline style exists ***
         let currentSize = element.style.fontSize;
         if (!currentSize) {
             currentSize = window.getComputedStyle(element).fontSize;
@@ -638,41 +718,34 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedElement = null;
     }
 
-    // 6. Main Toggle Logic
     editableElements.forEach(el => {
-        const handleEditStart = (ev) => {
+        el.addEventListener('click', (ev) => {
             if (!isDesignMode) return;
-            // *** MODIFIED: This function now ONLY shows the editor ***
             showEditor(el);
-        };
-        // *** MODIFIED: Changed to 'click' listener, removed mousedown/touchstart ***
-        el.addEventListener('click', handleEditStart);
+        });
     });
 
     designModeToggle.addEventListener('change', (e) => {
         isDesignMode = e.target.checked;
-        if (isDesignMode) {
-            labelContainer.classList.add('design-mode-active');
-            // *** REMOVED addGlobalListeners() ***
-        } else {
-            labelContainer.classList.remove('design-mode-active');
-            hideEditor();
-            // *** REMOVED removeGlobalListeners() ***
-        }
+        labelContainers.forEach(container => {
+             if (isDesignMode) {
+                container.classList.add('design-mode-active');
+            } else {
+                container.classList.remove('design-mode-active');
+            }
+        });
+        if (!isDesignMode) hideEditor();
     });
 
-    // 7. Editor Listeners
     closeEditorBtn.addEventListener('click', hideEditor);
     editorFontSize.addEventListener('input', (e) => {
         if (selectedElement) {
-            // *** REMOVED convertToAbsolute() check ***
             const newSize = parseFloat(e.target.value) || 10;
             selectedElement.style.fontSize = `${newSize}pt`;
             saveStyle(selectedElement);
         }
     });
 
-    // 8. Initial Load
     loadAllStyles();
 
 });
