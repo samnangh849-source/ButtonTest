@@ -169,10 +169,36 @@
             align-items: center;
             justify-content: center;
             text-align: center;
+            /* Use flexbox to distribute space vertically */
+            display: flex !important;
+            flex-direction: column;
+            padding-top: 4mm;
+            padding-bottom: 4mm;
         }
         #qrcode img {
             margin: 0 auto; 
             display: block;
+            border: 1px solid #000; /* Add border to QR image itself */
+            padding: 2px; /* White space between QR and border */
+            background: white;
+        }
+        
+        .qr-title {
+            font-size: 11pt;
+            font-weight: 800;
+            margin-bottom: 2mm;
+            text-transform: uppercase;
+        }
+
+        .qr-footer-box {
+            border: 1px solid #000;
+            border-radius: 4px;
+            padding: 1mm 4mm;
+            margin-top: 2mm;
+            font-weight: 700;
+            font-size: 8pt;
+            background-color: #fff;
+            box-shadow: 1px 1px 0px rgba(0,0,0,0.2);
         }
 
         /* ---------------- PRINT STYLES ---------------- */
@@ -224,7 +250,7 @@
                 print-color-adjust: exact;
             }
             
-            .cod-tag {
+            .cod-tag, .qr-footer-box {
                  border: 1px solid #000 !important;
             }
 
@@ -355,6 +381,24 @@
                 </div>
             </div>
         </div>
+
+         <!-- *** NEW: QR Code Settings (ALWAYS VISIBLE) *** -->
+        <div id="qrSettingsPanel" class="bg-slate-900/50 rounded-xl p-4 mb-4 border border-slate-700">
+            <h2 class="text-sm font-bold text-slate-300 mb-3 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-success" viewBox="0 0 20 20" fill="currentColor">
+                     <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2V5h1v1H5zM3 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3zm2 2v-1h1v1H5zM13 3a1 1 0 00-1 1v3a1 1 0 001 1h3a1 1 0 001-1V4a1 1 0 00-1-1h-3zm1 2v1h1V5h-1z" clip-rule="evenodd" />
+                    <path d="M11 11a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1h-6a1 1 0 01-1-1v-6zM17 13h-4v4h4v-4z" />
+                </svg>
+                QR Code Size
+            </h2>
+            <div class="flex items-center gap-3">
+                 <div class="flex-grow">
+                    <label for="qrSizeInput" class="block text-xs font-medium text-slate-400 mb-1">ទំហំ QR (px)</label>
+                    <input type="number" id="qrSizeInput" value="100" class="custom-input w-full rounded-lg p-2 text-sm">
+                </div>
+            </div>
+        </div>
+
 
         <!-- កំណត់ Margins -->
         <div class="bg-slate-900/50 rounded-xl p-4 mb-4 border border-slate-700">
@@ -541,12 +585,14 @@
 
         <!-- LABEL 2: QR Code (Hidden) -->
         <div id="qr-label-container" class="label-page hidden">
-            <div class="w-full h-full flex flex-col justify-center items-center text-center">
-                <h2 class="text-sm font-bold mb-3">Scan for Location</h2>
-                <!-- QR Code Render Target -->
-                <div id="qrcode" class="mb-3 bg-white p-2 border border-slate-200 rounded-lg shadow-sm print:shadow-none print:border-none"></div>
-                <p class="text-xs font-bold text-slate-700" id="qr-map-link-text">Google Maps Link</p>
-            </div>
+            <!-- Title -->
+            <h2 class="qr-title editable-element" id="qr-title-el">ស្កេនមើលទីតាំង</h2>
+            
+            <!-- QR Code Render Target -->
+            <div id="qrcode"></div>
+            
+            <!-- Footer Box -->
+            <div class="qr-footer-box editable-element" id="qr-footer-el">Google Maps Link</div>
         </div>
 
     </div> 
@@ -566,6 +612,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioWelcome = document.getElementById('audioWelcome');
     const audioGuide = document.getElementById('audioGuide');
     const audioSuccess = document.getElementById('audioSuccess');
+
+    // QR Size Input
+    const qrSizeInput = document.getElementById('qrSizeInput');
 
     // *** Audio Management Logic ***
     let currentAudio = null;      
@@ -607,6 +656,32 @@ document.addEventListener('DOMContentLoaded', () => {
         currentAudio.addEventListener('ended', onAudioEnded, { once: true }); 
     }
 
+    // Helper to Generate QR
+    function generateQR(size) {
+        if (params.map) {
+             const mapUrl = decodeURIComponent(params.map);
+             const qrDiv = document.getElementById('qrcode');
+             qrDiv.innerHTML = ""; // Clear old
+             
+             // Ensure size is valid number
+             const validSize = parseInt(size) || 100;
+             
+             new QRCode(qrDiv, {
+                text: mapUrl,
+                width: validSize,
+                height: validSize,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.M
+            });
+        }
+    }
+
+    // Update QR on Input Change
+    qrSizeInput.addEventListener('input', (e) => {
+        generateQR(e.target.value);
+    });
+
     if (params.id) {
         // Fill Data
         document.getElementById('label-page').textContent = params.page || 'N/A';
@@ -638,26 +713,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (params.map) {
             const qrContainer = document.getElementById('qr-label-container');
             const qrButton = document.getElementById('printQRButton');
-            const mapUrl = decodeURIComponent(params.map);
-
+            
             // 1. Show the QR Label Container (Preview)
             qrContainer.classList.remove('hidden');
-            // qrContainer.style.display = 'flex'; // Removed inline style to let class control it
             
             // 2. Show the Print QR Button
             qrButton.classList.remove('hidden');
-            qrButton.classList.add('flex'); // Add flex back if it was removed
+            qrButton.classList.add('flex'); 
 
-            // 3. Generate the QR Code
-            document.getElementById('qrcode').innerHTML = ""; // Clear old code
-            new QRCode(document.getElementById('qrcode'), {
-                text: mapUrl,
-                width: 128, // QR Size
-                height: 128,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.M
-            });
+            // 4. Generate the QR Code (Initial size 100)
+            generateQR(100);
         }
         // ===============================================
 
