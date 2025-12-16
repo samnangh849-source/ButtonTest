@@ -6,12 +6,39 @@
     <!-- Import Font Kantumruy Pro -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Import QRCode.js សម្រាប់បង្កើត QR Code -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Kantumruy Pro"', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#6366f1', /* Indigo 500 */
+                        secondary: '#0ea5e9', /* Sky 500 */
+                        success: '#10b981', /* Emerald 500 */
+                        danger: '#f43f5e', /* Rose 500 */
+                        warning: '#f59e0b', /* Amber 500 */
+                        dark: {
+                            bg: '#0f172a',      /* Slate 900 */
+                            card: '#1e293b',    /* Slate 800 */
+                            input: '#334155',   /* Slate 700 */
+                            border: '#475569',  /* Slate 600 */
+                            text: '#f1f5f9',    /* Slate 100 */
+                            muted: '#94a3b8'    /* Slate 400 */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
         /* CSS Variables សម្រាប់គ្រប់គ្រងទំហំ និង Margin */
@@ -26,29 +53,40 @@
 
         html, body {
             box-sizing: border-box;
-            font-family: 'Kantumruy Pro', 'Arial', 'Inter', sans-serif;
-            color: #000;
+            font-family: 'Kantumruy Pro', sans-serif;
+            color: #f1f5f9; /* Light text for Dark Mode body */
         }
         *, *:before, *:after { box-sizing: inherit; }
 
         /* --- STYLES សម្រាប់ Label ទាំងអស់ (ទាំង Label ដើម និង QR) --- */
         .label-page {
+            /* ទំហំត្រូវបានកំណត់ដោយ JS តាមរយៈ CSS variables */
             width: var(--page-width); 
             height: var(--page-height);
-            background-color: white;
-            margin: 0 auto;
+            
+            /* ពណ៌ផ្ទៃខាងក្រោយស */
+            background-color: white; 
+            
+            /* Padding ខាងក្នុង */
             padding: 1mm 3mm; 
+            
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             font-size: 8pt;
             line-height: 1.15;
             overflow: hidden;
-            border: 1px dashed #ccc;
             position: relative;
             
-            /* បន្ថែម margin-bottom ដើម្បីអោយមានគម្លាតរវាង Label ទាំងពីរពេលមើលលើអេក្រង់ */
-            margin-bottom: 20px; 
+            /* Visual Improvements for Screen Only - High Contrast Shadow */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+            border: 1px solid #cbd5e1; /* Light border to define edge in dark mode */
+            border-radius: 4px;
+            
+            color: #000; /* Ensure text is pure black on label */
+            
+            /* Important for Flex Layout: Prevent shrinking */
+            flex-shrink: 0;
         }
 
         /* --- Styles សម្រាប់ Label ព័ត៌មាន (Label ដើម) --- */
@@ -93,7 +131,7 @@
         .data-text { font-size: 9pt; font-weight: 700; } 
 
         .total-box {
-            background-color: #f0f0f0;
+            background-color: #f1f5f9; /* Slate 100 */
             color: #000;
             padding: 0.5mm;
             border-radius: 0.125rem;
@@ -128,13 +166,12 @@
 
         /* --- Styles សម្រាប់ QR Label ថ្មី --- */
         #qr-label-container {
-            /* Center content */
             align-items: center;
             justify-content: center;
             text-align: center;
         }
         #qrcode img {
-            margin: 0 auto; /* Center QR image */
+            margin: 0 auto; 
             display: block;
         }
 
@@ -154,6 +191,15 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 background: none !important;
+                color: #000 !important;
+            }
+
+            /* Reset the Wrapper to Block for Print */
+            #labels-wrapper {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             /* Apply print styles to generic label-page class */
@@ -167,10 +213,22 @@
                 border-radius: 0 !important;
                 overflow: hidden !important;
                 page-break-after: always; /* ដាក់ Page break */
-                margin-bottom: 0 !important;
+                
+                /* Reset colors for print */
+                color: #000 !important;
             }
 
-            /* Class សម្រាប់លាក់ Element ពេល Print (ប្រើសម្រាប់លាក់ Label មួយពេលព្រីនមួយទៀត) */
+            .total-box {
+                background-color: #f0f0f0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .cod-tag {
+                 border: 1px solid #000 !important;
+            }
+
+            /* Class សម្រាប់លាក់ Element ពេល Print */
             .hidden-on-print {
                 display: none !important;
             }
@@ -181,54 +239,79 @@
         /* ---------------- END PRINT STYLES ---------------- */
 
 
-        body { background-color: #f0f4f8; padding: 1rem; }
+        body { background-color: #0f172a; /* Slate 900 background */ padding: 2rem 1rem; }
 
-        /* Modal Styling */
+        /* Modal Styling Dark Mode */
         #print-guide-modal {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0, 0, 0, 0.7);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 50;
+            backdrop-filter: blur(4px);
         }
         #print-guide-content {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            max-width: 400px;
+            background: #1e293b;
+            color: #f1f5f9;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 450px;
             width: 90%;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border: 1px solid #334155;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
         }
 
         /* Design Mode Styles */
         .editable-element {
             cursor: default;
-            transition: outline 0.1s ease-in-out;
+            transition: all 0.2s ease-in-out;
+            border-radius: 2px;
         }
         .design-mode-active .editable-element {
-            cursor: text;
+            cursor: pointer;
+            padding: 2px; 
+        }
+        .design-mode-active .editable-element:hover {
+            background-color: rgba(99, 102, 241, 0.2); 
+            outline: 1px dashed #6366f1;
         }
         .editable-element.selected {
-            outline: 2px dashed #007bff;
+            outline: 2px solid #6366f1; 
+            background-color: rgba(99, 102, 241, 0.1);
             z-index: 10;
         }
         
         #styleEditor {
             position: fixed;
             z-index: 1001;
-            background: white;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            border: 1px solid #ddd;
+            background: #1e293b; 
+            color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            border: 1px solid #475569;
             bottom: -200px;
             left: 50%;
             transform: translateX(-50%);
-            width: 300px;
+            width: 320px;
             max-width: 90%;
-            transition: bottom 0.3s ease-in-out;
+            transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom Input Styles Dark */
+        .custom-input {
+            transition: all 0.2s;
+            background-color: #334155; 
+            border-color: #475569; 
+            color: white;
+        }
+        .custom-input:focus {
+            ring-width: 2px;
+            ring-color: #6366f1;
+            border-color: #6366f1;
+            outline: none;
         }
 
     </style>
@@ -236,86 +319,120 @@
 <body>
 
     <!-- UI មុនព្រីន (Control Panel) -->
-    <div class="no-print max-w-sm mx-auto p-4 bg-white rounded-lg shadow-lg mb-6 text-center">
-        <h1 class="text-xl font-bold text-gray-800 mb-2">ទម្រង់ព្រីន Label</h1>
-        <p class="text-sm text-gray-600 mb-4">ទំហំគោល (78mm x 50mm)</p>
+    <div class="no-print max-w-md mx-auto p-6 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl mb-8">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-white mb-1">🖨️ Label Printer</h1>
+            <p class="text-sm text-slate-400">ប្រព័ន្ធបង្កើតស្លាកដឹកជញ្ជូន (78mm x 50mm)</p>
+        </div>
 
         <!-- ជម្រើសទំហំ Label -->
-        <div class="border-t border-b border-gray-200 py-4 my-4">
-            <h2 class="text-md font-bold text-gray-700 mb-3 text-left">ជម្រើសទំហំ Label (mm)</h2>
+        <div class="bg-slate-900/50 rounded-xl p-4 mb-4 border border-slate-700">
+            <h2 class="text-sm font-bold text-slate-300 mb-3 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                </svg>
+                ជម្រើសទំហំ Label (mm)
+            </h2>
             <div class="flex items-center gap-6 mb-3">
-                <label class="flex items-center">
-                    <input type="radio" name="label_size" value="standard" checked class="form-radio">
-                    <span class="ml-2 text-sm">Standard (78x50)</span>
+                <label class="flex items-center cursor-pointer group">
+                    <input type="radio" name="label_size" value="standard" checked class="form-radio text-primary focus:ring-primary h-4 w-4 bg-slate-700 border-slate-500">
+                    <span class="ml-2 text-sm text-slate-300 group-hover:text-primary transition-colors">Standard (78x50)</span>
                 </label>
-                <label class="flex items-center">
-                    <input type="radio" name="label_size" value="custom" class="form-radio">
-                    <span class="ml-2 text-sm">Customize</span>
+                <label class="flex items-center cursor-pointer group">
+                    <input type="radio" name="label_size" value="custom" class="form-radio text-primary focus:ring-primary h-4 w-4 bg-slate-700 border-slate-500">
+                    <span class="ml-2 text-sm text-slate-300 group-hover:text-primary transition-colors">Customize</span>
                 </label>
             </div>
-            <div id="custom-size-inputs" class="hidden grid grid-cols-2 gap-3">
+            <!-- ช่อง Custom -->
+            <div id="custom-size-inputs" class="hidden grid grid-cols-2 gap-3 mt-2">
                 <div>
-                    <label for="customWidth" class="block text-xs font-medium text-gray-600 text-left mb-1">ទទឹង (Width)</label>
-                    <input type="number" id="customWidth" value="78" class="w-full border border-gray-300 rounded-md p-2 text-sm">
+                    <label for="customWidth" class="block text-xs font-semibold text-slate-400 mb-1">ទទឹង (Width)</label>
+                    <input type="number" id="customWidth" value="78" class="custom-input w-full rounded-lg p-2 text-sm">
                 </div>
                 <div>
-                    <label for="customHeight" class="block text-xs font-medium text-gray-600 text-left mb-1">បណ្ដោយ (Height)</label>
-                    <input type="number" id="customHeight" value="50" class="w-full border border-gray-300 rounded-md p-2 text-sm">
+                    <label for="customHeight" class="block text-xs font-semibold text-slate-400 mb-1">បណ្ដោយ (Height)</label>
+                    <input type="number" id="customHeight" value="50" class="custom-input w-full rounded-lg p-2 text-sm">
                 </div>
             </div>
         </div>
 
         <!-- កំណត់ Margins -->
-        <div class="border-b border-gray-200 pb-4 mb-4">
-            <h2 class="text-md font-bold text-gray-700 mb-3 text-left">កំណត់ Margins បោះពុម្ព (mm)</h2>
+        <div class="bg-slate-900/50 rounded-xl p-4 mb-4 border border-slate-700">
+            <h2 class="text-sm font-bold text-slate-300 mb-3 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-secondary" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm2 2v10h10V5H5z" clip-rule="evenodd" />
+                </svg>
+                កំណត់ Margins (mm)
+            </h2>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label for="marginTop" class="block text-xs font-medium text-gray-600 text-left mb-1">Margin លើ (Top)</label>
-                    <input type="number" id="marginTop" value="0" class="w-full border border-gray-300 rounded-md p-2 text-sm">
+                    <label for="marginTop" class="block text-xs font-medium text-slate-400 mb-1">Margin លើ</label>
+                    <input type="number" id="marginTop" value="0" class="custom-input w-full rounded-lg p-2 text-sm">
                 </div>
                 <div>
-                    <label for="marginRight" class="block text-xs font-medium text-gray-600 text-left mb-1">Margin ស្ដាំ (Right)</label>
-                    <input type="number" id="marginRight" value="0" class="w-full border border-gray-300 rounded-md p-2 text-sm">
+                    <label for="marginRight" class="block text-xs font-medium text-slate-400 mb-1">Margin ស្ដាំ</label>
+                    <input type="number" id="marginRight" value="0" class="custom-input w-full rounded-lg p-2 text-sm">
                 </div>
                 <div>
-                    <label for="marginBottom" class="block text-xs font-medium text-gray-600 text-left mb-1">Margin ក្រោម (Bottom)</label>
-                    <input type="number" id="marginBottom" value="0" class="w-full border border-gray-300 rounded-md p-2 text-sm">
+                    <label for="marginBottom" class="block text-xs font-medium text-slate-400 mb-1">Margin ក្រោម</label>
+                    <input type="number" id="marginBottom" value="0" class="custom-input w-full rounded-lg p-2 text-sm">
                 </div>
                 <div>
-                    <label for="marginLeft" class="block text-xs font-medium text-gray-600 text-left mb-1">Margin ឆ្វេង (Left)</label>
-                    <input type="number" id="marginLeft" value="0" class="w-full border border-gray-300 rounded-md p-2 text-sm">
+                    <label for="marginLeft" class="block text-xs font-medium text-slate-400 mb-1">Margin ឆ្វេង</label>
+                    <input type="number" id="marginLeft" value="0" class="custom-input w-full rounded-lg p-2 text-sm">
                 </div>
             </div>
         </div>
 
-        <!-- Design Mode Toggle -->
-        <div class="border-b border-gray-200 pb-4 mb-4">
-            <label class="flex items-center cursor-pointer">
-                <input type="checkbox" id="designModeToggle" class="form-checkbox h-5 w-5 text-blue-600">
-                <span class="ml-2 text-sm text-gray-700">កែរចនាបទ Label</span>
+        <!-- Design Mode & Reset -->
+        <div class="flex items-center justify-between mb-6 px-1">
+            <label class="flex items-center cursor-pointer group select-none">
+                <div class="relative">
+                    <input type="checkbox" id="designModeToggle" class="sr-only">
+                    <div class="block bg-slate-700 border border-slate-600 w-10 h-6 rounded-full group-hover:bg-slate-600 transition-colors"></div>
+                    <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition transform duration-200 ease-in-out"></div>
+                </div>
+                <span class="ml-3 text-sm font-medium text-slate-300">កែរចនាបទ</span>
             </label>
-        </div>
-
-        <!-- Reset Button -->
-        <div class="border-b border-gray-200 pb-4 mb-4">
-            <button id="resetDesignButton" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                Reset រចនាបទ ទៅដូចដើម
+            
+            <button id="resetDesignButton" class="text-xs text-rose-400 hover:text-rose-500 font-medium underline decoration-dashed underline-offset-4 transition-colors">
+                Reset ទៅដូចដើម
             </button>
         </div>
 
-        <div class="flex flex-col gap-2">
-            <button id="guideButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                ព័ត៌មានបោះពុម្ព(ការកំណត់)
+        <style>
+            #designModeToggle:checked ~ .block {
+                background-color: #6366f1; /* Indigo */
+                border-color: #6366f1;
+            }
+            #designModeToggle:checked ~ .dot {
+                transform: translateX(100%);
+            }
+        </style>
+
+        <!-- Buttons Control -->
+        <div class="flex flex-col gap-3">
+             <button id="guideButton" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-sm hover:shadow-md transition duration-300 flex items-center justify-center gap-2 border border-amber-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+                ការកំណត់ Printer
             </button>
 
             <!-- Main Print Button -->
-            <button id="printButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
+            <button id="printButton" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 transition duration-300 flex items-center justify-center gap-2 text-lg border border-indigo-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
                 Print Label
             </button>
 
             <!-- QR Print Button (Hidden by default, shown if map exists) -->
-            <button id="printQRButton" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300">
-                Print QR Code Map
+            <button id="printQRButton" class="hidden w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-teal-500/30 transition duration-300 items-center justify-center gap-2 border border-teal-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4h2v-4zM5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                Print QR Map
             </button>
         </div>
     </div>
@@ -323,83 +440,117 @@
     <!-- Modal (Print Guide) -->
     <div id="print-guide-modal" class="no-print flex">
         <div id="print-guide-content">
-            <h2 class="text-lg font-bold mb-2 text-gray-800">ការកំណត់ Printer ត្រឹមត្រូវ</h2>
-            <ul class="list-disc pl-5 text-sm text-gray-700 mb-4 text-left">
-                <li>ជ្រើស <strong>Destination:</strong> EML-200L (2 inch)</li>
-                <li><strong>Paper size:</strong> Custom (ប្រើទំហំដែលបានកំណត់)</li>
-                <li><strong>Margins:</strong> None (ឬ ប្រើ Custom Margins)</li>
-                <li><strong>Background graphics:</strong> ON</li>
-            </ul>
-            <button id="closeGuide" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">បិទ</button>
+            <div class="flex justify-between items-start mb-4">
+                <h2 class="text-xl font-bold text-white">ការកំណត់ Printer</h2>
+                <button id="closeGuide" class="text-slate-400 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-700 p-4 rounded-lg mb-4">
+                <ul class="space-y-2 text-sm text-slate-300">
+                    <li class="flex items-start gap-2">
+                        <span class="font-bold text-primary">•</span>
+                        <span><strong>Destination:</strong> EML-200L (2 inch)</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="font-bold text-primary">•</span>
+                        <span><strong>Paper size:</strong> Custom / User Defined</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="font-bold text-primary">•</span>
+                        <span><strong>Margins:</strong> None (បិទ Margin)</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="font-bold text-primary">•</span>
+                        <span><strong>Background graphics:</strong> <span class="text-green-400 font-bold">ON</span> (សំខាន់!)</span>
+                    </li>
+                </ul>
+            </div>
+            <button id="closeGuideBtn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg transition-colors border border-slate-600">
+                យល់ហើយ
+            </button>
         </div>
     </div>
 
     <!-- Style Editor Panel -->
     <div id="styleEditor" class="no-print">
-        <div class="flex justify-between items-center mb-2">
-            <h4 id="editorTitle" class="text-sm font-bold">Edit Element</h4>
-            <button id="closeEditor" class="text-xl font-bold text-red-500 leading-none">&times;</button>
+        <div class="flex justify-between items-center mb-3">
+            <h4 id="editorTitle" class="text-sm font-bold text-slate-200">Edit Element</h4>
+            <button id="closeEditor" class="text-slate-400 hover:text-rose-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
         </div>
         <div class="mb-2">
-            <label class="block text-xs mb-1">Font Size (pt)</label>
-            <input type="number" id="editorFontSize" class="w-full border border-gray-300 p-1 rounded" step="0.5">
-        </div>
-    </div>
-
-
-    <!-- ========================================= -->
-    <!--          LABEL 1: Main Information        -->
-    <!-- ========================================= -->
-    <div id="label-container" class="label-page">
-        <div class="label-header editable-element" id="label-header-el">
-            <span><span id="label-page">N/A</span></span>
-            <span>User: <span id="label-user">N/A</span></span>
-            <span>ID: <span id="label-order-id">ORD-XXXXX</span></span>
-        </div>
-
-        <div class="info-row" id="info-row-el">
-            <div class="info-block left">
-                <div class="small-text editable-element" id="label-recipient-title">អ្នកទទួល / Recipient:</div>
-                <div id="label-name" class="big-text editable-element">ឈ្មោះអតិថិជន</div>
-                <div id="label-phone" class="mt-0.5 editable-element">0xx xxx xxx</div>
-
-                <div class="small-text mt-1 editable-element" id="label-location-title">ទីតាំង / Location:</div>
-                <div id="label-location" class="data-text editable-element">ភ្នំពេញថ្មី</div>
-
-                <div class="small-text mt-1 editable-element" id="label-address-title">អាសយដ្ឋាន / Address:</div>
-                <div id="label-address" class="data-text editable-element">(មិនបានបញ្ជាក់)</div>
-            </div>
-
-            <div class="info-block right">
-                <div class="small-text editable-element" id="label-date-title">កាលបរិច្ឆេទ:</div>
-                <div id="label-date" class="data-text editable-element">DD/MM/YYYY</div>
-
-                <div class="total-box editable-element" id="label-total-box">តម្លៃសរុប: <span id="label-total">$0.00</span></div>
-
-                <div class="small-text mt-1 editable-element" id="label-payment-title">ស្ថានភាពបង់ប្រាក់:</div>
-                <div id="label-payment" class="data-text font-bold editable-element">Unpaid</div>
-
-                <div class="small-text mt-1 editable-element" id="label-shipping-title">ដឹកជញ្ជូនដោយ:</div>
-                <div id="label-shipping" class="data-text editable-element">N/A</div>
-                
-                <div id="label-cod" class="cod-tag editable-element hidden">COD (Cash on Delivery)</div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Font Size (pt)</label>
+            <div class="flex items-center gap-2">
+                <input type="number" id="editorFontSize" class="custom-input w-full p-2 rounded-md text-sm" step="0.5">
+                <span class="text-xs text-slate-500">pt</span>
             </div>
         </div>
-
-        <div class="label-footer editable-element" id="label-footer-el">សូមដឹកជញ្ជូនដោយប្រុងប្រយ័ត្ន!</div>
     </div>
 
+
     <!-- ========================================= -->
-    <!--          LABEL 2: QR Code (Hidden)        -->
+    <!--           SIDE-BY-SIDE CONTAINER          -->
     <!-- ========================================= -->
-    <div id="qr-label-container" class="label-page hidden">
-        <div class="w-full h-full flex flex-col justify-center items-center text-center">
-            <h2 class="text-sm font-bold mb-2">Scan for Location</h2>
-            <!-- QR Code Render Target -->
-            <div id="qrcode" class="mb-2 bg-white p-1"></div>
-            <p class="text-xs font-bold" id="qr-map-link-text">Google Maps Link</p>
+    <div id="labels-wrapper" class="flex flex-wrap justify-center gap-8 items-start mb-8 w-full">
+        
+        <!-- LABEL 1: Main Information -->
+        <div id="label-container" class="label-page">
+            <div class="label-header editable-element" id="label-header-el">
+                <span><span id="label-page">N/A</span></span>
+                <span>User: <span id="label-user">N/A</span></span>
+                <span>ID: <span id="label-order-id">ORD-XXXXX</span></span>
+            </div>
+
+            <div class="info-row" id="info-row-el">
+                <div class="info-block left">
+                    <div class="small-text editable-element" id="label-recipient-title">អ្នកទទួល / Recipient:</div>
+                    <div id="label-name" class="big-text editable-element">ឈ្មោះអតិថិជន</div>
+                    <div id="label-phone" class="mt-0.5 editable-element">0xx xxx xxx</div>
+
+                    <div class="small-text mt-1 editable-element" id="label-location-title">ទីតាំង / Location:</div>
+                    <div id="label-location" class="data-text editable-element">ភ្នំពេញថ្មី</div>
+
+                    <div class="small-text mt-1 editable-element" id="label-address-title">អាសយដ្ឋាន / Address:</div>
+                    <div id="label-address" class="data-text editable-element">(មិនបានបញ្ជាក់)</div>
+                </div>
+
+                <div class="info-block right">
+                    <div class="small-text editable-element" id="label-date-title">កាលបរិច្ឆេទ:</div>
+                    <div id="label-date" class="data-text editable-element">DD/MM/YYYY</div>
+
+                    <div class="total-box editable-element" id="label-total-box">តម្លៃសរុប: <span id="label-total">$0.00</span></div>
+
+                    <div class="small-text mt-1 editable-element" id="label-payment-title">ស្ថានភាពបង់ប្រាក់:</div>
+                    <div id="label-payment" class="data-text font-bold editable-element">Unpaid</div>
+
+                    <div class="small-text mt-1 editable-element" id="label-shipping-title">ដឹកជញ្ជូនដោយ:</div>
+                    <div id="label-shipping" class="data-text editable-element">N/A</div>
+                    
+                    <div id="label-cod" class="cod-tag editable-element hidden">COD (Cash on Delivery)</div>
+                </div>
+            </div>
+
+            <div class="label-footer editable-element" id="label-footer-el">សូមដឹកជញ្ជូនដោយប្រុងប្រយ័ត្ន!</div>
         </div>
-    </div>
+
+        <!-- LABEL 2: QR Code (Hidden) -->
+        <div id="qr-label-container" class="label-page hidden">
+            <div class="w-full h-full flex flex-col justify-center items-center text-center">
+                <h2 class="text-sm font-bold mb-3">Scan for Location</h2>
+                <!-- QR Code Render Target -->
+                <div id="qrcode" class="mb-3 bg-white p-2 border border-slate-200 rounded-lg shadow-sm print:shadow-none print:border-none"></div>
+                <p class="text-xs font-bold text-slate-700" id="qr-map-link-text">Google Maps Link</p>
+            </div>
+        </div>
+
+    </div> 
+    <!-- End Side-by-Side Container -->
 
     <!-- Audio Players -->
     <audio id="audioWelcome" src="welcome.mp3" preload="auto"></audio>
@@ -491,9 +642,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 1. Show the QR Label Container (Preview)
             qrContainer.classList.remove('hidden');
+            // qrContainer.style.display = 'flex'; // Removed inline style to let class control it
             
             // 2. Show the Print QR Button
             qrButton.classList.remove('hidden');
+            qrButton.classList.add('flex'); // Add flex back if it was removed
 
             // 3. Generate the QR Code
             document.getElementById('qrcode').innerHTML = ""; // Clear old code
@@ -539,8 +692,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.print();
 
         // Remove hidden classes after print dialogue closes (so preview returns to normal)
-        // Note: window.print() is blocking in many browsers, but not all. 
-        // We use a small timeout or just run immediately after since JS pauses.
         allLabels.forEach(label => {
             label.classList.remove('hidden-on-print');
         });
@@ -566,20 +717,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const guideBtn = document.getElementById('guideButton');
     const guideModal = document.getElementById('print-guide-modal');
     const closeGuide = document.getElementById('closeGuide');
+    const closeGuideBtn = document.getElementById('closeGuideBtn');
 
-    guideBtn.addEventListener('click', () => {
-        playAudio(audioGuide);
-        guideModal.style.display = 'flex';
-    });
-    
-    closeGuide.addEventListener('click', () => {
+    function hideGuide() {
         if (currentAudio && currentAudio === audioGuide) {
             currentAudio.pause();
             currentAudio.currentTime = 0;
             onAudioEnded(); 
         }
         guideModal.style.display = 'none';
+    }
+
+    guideBtn.addEventListener('click', () => {
+        playAudio(audioGuide);
+        guideModal.style.display = 'flex';
     });
+    
+    closeGuide.addEventListener('click', hideGuide);
+    closeGuideBtn.addEventListener('click', hideGuide);
 
     // Label Size Logic (Updates ALL .label-page elements)
     const rootStyle = document.documentElement.style;
@@ -670,8 +825,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const resetDesignButton = document.getElementById('resetDesignButton');
     resetDesignButton.addEventListener('click', () => {
-        localStorage.removeItem(STYLES_KEY);
-        window.location.reload();
+        if(confirm('តើអ្នកពិតជាចង់កំណត់រចនាបទឡើងវិញមែនទេ?')) {
+            localStorage.removeItem(STYLES_KEY);
+            window.location.reload();
+        }
     });
 
     let isDesignMode = false;
@@ -701,7 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedElement = element;
         editableElements.forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
-        styleEditor.style.bottom = '10px'; 
+        styleEditor.style.bottom = '20px'; // Higher up
         editorTitle.textContent = `Edit: #${element.id}`;
         let currentSize = element.style.fontSize;
         if (!currentSize) {
@@ -722,6 +879,7 @@ document.addEventListener('DOMContentLoaded', () => {
         el.addEventListener('click', (ev) => {
             if (!isDesignMode) return;
             showEditor(el);
+            ev.stopPropagation(); // Prevent clicking through
         });
     });
 
@@ -743,6 +901,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const newSize = parseFloat(e.target.value) || 10;
             selectedElement.style.fontSize = `${newSize}pt`;
             saveStyle(selectedElement);
+        }
+    });
+
+    // Close editor when clicking outside
+    document.addEventListener('click', (e) => {
+        if (isDesignMode && selectedElement && !e.target.closest('.editable-element') && !e.target.closest('#styleEditor')) {
+            hideEditor();
         }
     });
 
